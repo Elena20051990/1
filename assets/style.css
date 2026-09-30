@@ -188,3 +188,11 @@ label.lbl{display:grid;gap:8px;color:var(--muted);font-size:13px;font-weight:600
 .footer-main{grid-template-columns:1fr 1fr}.footer-main>:first-child{grid-column:1/-1}
 .page{padding-top:40px}
 }
+/* сквозные блоки */
+.factors{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px}
+.factors article{padding:26px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.factors h3{margin-bottom:10px;color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:24px;font-weight:700}
+.factors p{color:var(--muted);font-size:14px;line-height:1.65}
+.checklist{margin-top:34px}
+.steps-grid .step{min-height:0}
+@media(max-width:850px){.factors{grid-template-columns:1fr}}

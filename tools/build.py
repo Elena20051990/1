@@ -14,7 +14,7 @@ TXT = (ROOT / "tools" / "niche.txt").read_text(encoding="utf-8")
 LINES = [html.unescape(l).rstrip() for l in TXT.split("\n")]
 
 SITE = "ВАЛЮРА"
-SITE_SUB = "Рейтинг скупок алкоголя"
+SITE_SUB = "Скупка алкоголя · рейтинг"
 UPDATED = "30 сентября 2026"
 e = html.escape
 
@@ -182,15 +182,14 @@ def header(depth=0):
 <div class="container header-inner">
 <a href="{home}" class="nav-logo" aria-label="{SITE} — главная">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
 <nav class="nav-links" aria-label="Главная навигация">
-<a href="{home}#ranking">Рейтинг</a>
-<a href="{p}prices.html">Цены выкупа</a>
+<a href="{home}#ranking">Где продать</a>
+<a href="{p}prices.html">Цены</a>
 <a href="{home}#calc">Калькулятор</a>
-<a href="{home}#choose">Как выбрать</a>
-<a href="{home}#faq">Вопросы</a>
-<a href="{home}#method">Методика</a>
+<a href="{home}#choose">Перед сделкой</a>
+<a href="{home}#method">Методика оценки</a>
 </nav>
 <div class="header-actions">
-<a href="{home}#calc" class="btn btn-primary header-cta">Прикинуть выкуп <span class="arrow">→</span></a>
+<a href="{home}#calc" class="btn btn-primary header-cta">Оценить алкоголь <span class="arrow">→</span></a>
 </div>
 </div>
 </header>
@@ -205,14 +204,14 @@ def footer(depth=0):
 <div class="footer-main">
 <div>
 <a href="{home}" class="nav-logo">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
-<p class="footer-logo-copy">Сравнение компаний, которые скупают элитный и коллекционный алкоголь в Москве. Данные собраны по публичным сайтам компаний.</p>
+<p class="footer-logo-copy">Где продать алкоголь в Москве: рейтинг скупок коньяка, виски, вина и шампанского.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
-<a href="{home}#ranking">Рейтинг</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
+<a href="{home}#ranking">Рейтинг скупок</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
-<a href="{home}#method">Методика и оговорки</a><a href="{home}#disclosure">Реклама и раскрытие</a></div></div>
+<a href="{home}#method">Методика оценки</a><a href="{home}#disclosure">Реклама</a></div></div>
 </div>
-<p class="legal">Реклама. Первые два места в рейтинге занимают проекты владельца сайта (Room Alco и Diamant Alko), места 3–20 расставлены по прозрачности цен и полноте данных. Рейтинг не является независимым. Цены и сроки — заявленные компаниями ориентиры, а не оферта; самозаявления компаний не проверялись. Чрезмерное употребление алкоголя вредит вашему здоровью. Лицам младше 18 лет продажа алкоголя запрещена.</p>
+<p class="legal">Реклама. Места 1–2 занимают проекты владельца сайта (Room Alco, Diamant Alko); рейтинг не является независимым. Цены и сроки — заявления компаний, не оферта. Продажа алкоголя лицам младше 18 лет запрещена.</p>
 <div class="footer-bottom"><p>© 2026 {SITE}. Информация носит справочный характер.</p><p>Данные актуальны на {UPDATED}</p></div>
 </div>
 </footer>
@@ -260,6 +259,114 @@ def mode_of(c):
     return m[1].strip().rstrip(".") if m else "не указан"
 
 
+def shared_blocks(depth=0):
+    """Сквозные блоки: калькулятор, пять вопросов, подготовка бутылки, методика оценки."""
+    p = "../" * depth
+    disc_rows = "".join(
+        f"<tr><td>{e(n)}</td><td>{rub(mk)}</td><td>{rub(b)}</td><td class='lime'>−{round((1 - b / mk) * 100)}%</td></tr>"
+        for n, mk, b in DISC)
+    clusters = "".join(
+        f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
+    return f"""<div class="shared">
+<section class="section ranking-section" id="calc">
+<div class="container">
+<div class="calculator-shell">
+<div class="calculator-form">
+<span class="eyebrow">Калькулятор</span>
+<h2 class="calculator-title">Сколько стоит ваш алкоголь при выкупе?</h2>
+<p class="calculator-copy">Хотите понять, за какую сумму можно продать коньяк, виски, вино или шампанское? Введите рыночную цену бутылки — аукционную или цену импортёра. Скупки обычно платят 67–72% от неё: так получается по таблице 1buyup. Это быстрый ориентир, а не оценка конкретной бутылки — точную сумму назовёт эксперт после фото и осмотра.</p>
+<form id="calcForm" class="form-grid">
+<label class="full lbl">Рыночная цена бутылки, ₽<input class="field" id="market" type="number" min="1" step="100" inputmode="numeric" placeholder="например, 45000" required></label>
+<button class="btn btn-primary calculator-submit full" type="submit">Узнать стоимость <span class="arrow">→</span></button>
+</form>
+</div>
+<aside class="calculator-result" aria-live="polite">
+<span class="result-label">Ориентир выкупа</span>
+<div class="result-price" id="resultPrice">—</div>
+<p class="result-note" id="resultNote">Введите цену и нажмите кнопку — получите предварительный диапазон.</p>
+<div class="range"></div>
+<span class="result-disclaimer">Не является ценой сделки. Подлинность, этикетка, капсула, пробка, уровень жидкости, коробка и спрос меняют итоговую сумму.</span>
+</aside>
+</div>
+<h3 class="sub">Как считается дисконт: таблица 1buyup, виски</h3>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Позиция</th><th>Рынок</th><th>Готовы купить до</th><th>Дисконт</th></tr></thead>
+<tbody>{disc_rows}</tbody></table></div>
+<p class="note">Источник: 1buyup.ru, страница «Виски», цифры ориентировочные. Компания платит не больше 67–72% рынка. Реальные цены других скупок — на странице <a href="{p}prices.html" class="text-link">«Цены выкупа»</a>.</p>
+</div>
+</section>
+
+<section class="section" id="choose">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Перед сделкой</span><h2 class="section-title">Пять вопросов<br>перед сделкой</h2></div>
+<p class="section-copy">Скупка устроена однотипно: заявка, фото, предварительная цена, встреча и расчёт. Различия скрыты в деталях — проверьте их до того, как отправить бутылку или вызвать выезд.</p>
+</div>
+<div class="steps-grid">
+<article class="step"><div class="step-number">01</div><h3 class="step-title">Цена изменится?</h3><p>Главная причина недовольства клиентов — цена меняется при встрече. 1buyup, TotalStok, Kupimalko и VykupAlko прямо обещают, что согласованная по фото сумма не изменится. Попросите подтвердить это в переписке до приезда специалиста.</p></article>
+<article class="step"><div class="step-number">02</div><h3 class="step-title">«От» или «до»?</h3><p>700ml пишет «от» (нижняя граница), 1buyup — «до» (потолок). По Yamazaki 18 разброс достигает 2,5 раза. Напрямую такие цифры сравнивать нельзя — уточняйте, что именно компания готова заплатить.</p></article>
+<article class="step"><div class="step-number">03</div><h3 class="step-title">Есть ли цены на сайте?</h3><p>Конкретные цены публикуют четыре компании: 700ml, 1buyup, Red Decanter и SKUPKA-ALKOGOL. Остальные называют сумму только после того, как вы пришлёте фото.</p></article>
+<article class="step"><div class="step-number">04</div><h3 class="step-title">Кто на самом деле?</h3><p>Независимых операторов меньше, чем сайтов: часть сайтов, вероятно, принадлежит одной компании (см. методику ниже). Запрос в «разные» скупки одной группы даст то же предложение.</p></article>
+<article class="step"><div class="step-number">05</div><h3 class="step-title">Что с обещаниями?</h3><p>«До 90%» и «до 100%» рыночной цены — маркетинг: реальный дисконт около 28–33%. Цифры «10+ лет», «5000 сделок» и «97% выкупа» — самозаявления, их никто не проверял.</p></article>
+<article class="step"><div class="step-number">06</div><h3 class="step-title">Как пройдёт сделка?</h3><p>Обычно так: заявка → фото в мессенджер → предварительная цена → выезд или встреча → осмотр → расчёт наличными или переводом на карту. Уточните, будет ли договор и кто приедет.</p></article>
+</div>
+<div class="prose checklist">
+<p><strong>Как продать алкоголь выгодно и быстро.</strong> Не ограничивайтесь одним предложением: отправьте одинаковые фотографии в две-три компании любым удобным способом — через мессенджер, по телефону или заявку на сайте — и сравните сумму, срок ответа и условия. Обратите внимание на преимущества: выезд на адрес в Москве и Московской области, оплату наличными или на карту, возможность продать целую коллекцию, работу с регионами России. Важно: не соглашайтесь на предложение без объяснения, от чего зависит цена, и не отправляйте бутылку, пока сумма не подтверждена.</p>
+</div>
+</div>
+</section>
+
+<section class="section ranking-section" id="prepare">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Фото для оценки</span><h2 class="section-title">Как подготовить<br>бутылку к оценке</h2></div>
+<p class="section-copy">Чем точнее фотографии, тем быстрее придёт ответ и тем ближе предварительная цена к итоговой. Сделайте снимки при дневном свете и отправьте в Telegram, WhatsApp, Viber или Max выбранной компании.</p>
+</div>
+<div class="trust-grid">
+<article class="trust-item"><div class="trust-symbol">1</div><h3 class="trust-title">Этикетки</h3><p>Сфотографируйте лицевую и обратную этикетки, чтобы эксперт увидел бренд, производителя, год и состояние бумаги.</p></article>
+<article class="trust-item"><div class="trust-symbol">2</div><h3 class="trust-title">Капсула и пробка</h3><p>Покажите горлышко, капсулу, пробку и акцизную марку — повреждения заметно снижают стоимость.</p></article>
+<article class="trust-item"><div class="trust-symbol">3</div><h3 class="trust-title">Уровень жидкости</h3><p>Снимите бутылку на просвет: для старых бутылок и винтажных вин уровень жидкости критичен.</p></article>
+<article class="trust-item"><div class="trust-symbol">4</div><h3 class="trust-title">Упаковка</h3><p>Коробка, тубус, подарочная упаковка, декантер и документы повышают цену: без коробки до −30% (данные Red Decanter).</p></article>
+</div>
+<div class="prose checklist">
+<p><strong>В сообщении укажите:</strong> бренд, название или релиз, год, объём, количество бутылок, город и удобный способ связи. Несколько экземпляров или целую коллекцию сфотографируйте общим планом и отправьте список.</p>
+<p><strong>Чего не делать:</strong> не открывайте бутылку, не протирайте и не переклеивайте этикетки, не отрывайте акцизные марки. Сохраните коробки, тубусы, сертификаты и чеки — они подтверждают подлинность и происхождение.</p>
+</div>
+</div>
+</section>
+
+<section class="section" id="method">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Методика оценки</span><h2 class="section-title">Как оценивают<br>алкоголь</h2></div>
+<p class="section-copy">Так оценивают элитный и коллекционный алкоголь в Москве: эксперт называет цену по фото, а итоговую сумму подтверждает после осмотра бутылки.</p>
+</div>
+<div class="prose">
+<p><strong>Какой алкоголь принимают.</strong> Скупки покупают элитные алкогольные напитки и коллекционное спиртное: коньяк (Hennessy, Rémy Martin, Louis XIII, Martell, Courvoisier), виски (Macallan, Yamazaki, Balvenie, Highland Park), вино (Petrus, Château Margaux, Château Lafite Rothschild, Château Mouton Rothschild — французские, Masseto и Sassicaia — итальянские), шампанское (Dom Pérignon, Cristal, Krug, Salon), ром, арманьяк и бренди, а также старые бутылки советского времени (СССР) с коллекционной ценностью. Принимают и отдельные бутылки, и целую коллекцию частного собрания. Водку и другой массовый сегмент, открытые бутылки и подделки обычно не берут — исключение делают Cupaj Club и Alko Prikup.</p>
+</div>
+<div class="factors">
+<article><h3>Подлинность и бренд</h3><p>Производитель, марка и линейка — то, что влияет на стоимость в первую очередь. Поэтому эксперт просит показать этикетку и все основные детали бутылки. Подделки не принимают.</p></article>
+<article><h3>Год и выдержка</h3><p>Винтаж, год выпуска, возраст виски и коньяка, ограниченный тираж и спрос на редкие релизы.</p></article>
+<article><h3>Этикетка, капсула, пробка</h3><p>Сохранность бумаги, целая капсула и пробка, наличие акцизной марки и подарочной упаковки.</p></article>
+<article><h3>Уровень жидкости</h3><p>Чем ниже уровень, тем дешевле бутылка. Открытые бутылки обычно не берут.</p></article>
+<article><h3>Упаковка и комплектность</h3><p>Оригинальная коробка, тубус, футляр и декантер. Иногда их покупают отдельно.</p></article>
+<article><h3>Объём, регион, партия</h3><p>Формат бутылки, город (в Москве платят больше) и количество: целая коллекция может оцениваться иначе, чем одна бутылка.</p></article>
+</div>
+<div class="prose" id="disclosure">
+<p><strong>Откуда берутся цены.</strong> Ориентир — мировые аукционные цены и цены импортёров, а не розница магазина. Поэтому выкуп стоит дешевле, чем та же бутылка в магазине. Цены на сайтах скупок — заявленные ориентиры, а не оферта.</p>
+<p><strong>Как составлен рейтинг.</strong> Изучены главные страницы сайтов и, где удалось, страницы категорий. Если сайт закрыт для автоматического доступа, использованы фрагменты поисковой выдачи (это отмечено в карточке). Данные собраны 30 сентября 2026 г. «Не публикует» значит: цен нет на проверенных страницах. Места 3–20 расставлены по прозрачности цен и полноте данных. Числовые рейтинги не выставлялись: независимого источника нет, оценки на Яндекс Картах и 2ГИС не собирались.</p>
+<p><strong>Реклама и раскрытие.</strong> Места 1 и 2 занимают Room Alco и Diamant Alko — проекты владельца этого сайта, места закреплены заранее. Рейтинг не является независимым.</p>
+<p><strong>Не проверено.</strong> Skupka-Star, Vine-Co (vine-co.ru), VinomerPro, Skupix, СпецВыкуп, Collectors Community, «VIP Выкуп», Vikup-Vina, e-skupka.ru, Alko-vikup, «Скупка PRO»; отзывы на Яндекс Картах и 2ГИС; цены на подстраницах категорий.</p>
+<h3 class="sub">Возможно, один оператор</h3>
+<p>По шаблонам, текстам и контактам видны группы сайтов, которые, вероятно, принадлежат одному оператору. Это признаки, а не доказательство.</p>
+<div class="table-wrap"><table class="data"><thead><tr><th>Группа</th><th>Сайты</th></tr></thead><tbody>{clusters}</tbody></table></div>
+</div>
+</div>
+</section>
+</div>
+"""
+
+
 def index_page():
     disc_rows = "".join(
         f"<tr><td>{e(n)}</td><td>{rub(mk)}</td><td>{rub(b)}</td><td class='lime'>−{round((1 - b / mk) * 100)}%</td></tr>"
@@ -271,15 +378,15 @@ def index_page():
     clusters = "".join(
         f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
     priced = sum(1 for c in CARDS if c["meta"]["price"] not in ("Не публикует", "Не проверено"))
-    body = head(f"Рейтинг скупок элитного алкоголя в Москве — {SITE}",
-                "Сравнение 20 компаний по скупке элитного и коллекционного алкоголя в Москве: скорость оценки, публичные цены, условия выезда, плюсы и минусы.") + header() + f"""
+    body = head(f"Где можно продать алкоголь в Москве? Рейтинг скупок — {SITE}",
+                "Где продать коньяк, виски, вино и шампанское в Москве выгодно и быстро: рейтинг 20 скупок элитного и коллекционного алкоголя, цены выкупа, скорость оценки по фото, условия выезда.") + header() + f"""
 <main id="top">
 <section class="hero">
 <div class="container hero-grid">
 <div class="hero-content">
 <span class="eyebrow">Москва · обновлено {UPDATED}</span>
-<h1 class="hero-title">Кому продать<br><span class="lime">элитный алкоголь?</span></h1>
-<p class="hero-copy">Рейтинг 20 скупок коллекционного виски, коньяка, вина и шампанского: кто называет цены открыто, как быстро оценивает по фото и что обещает клиенту.</p>
+<h1 class="hero-title">Где можно продать<br><span class="lime">алкоголь в Москве?</span></h1>
+<p class="hero-copy">Рейтинг 20 скупок коллекционного виски, коньяка, вина и шампанского: кто называет цену открыто, как быстро делает оценку по фото и на каких условиях приезжает на выкуп.</p>
 <div class="hero-buttons">
 <a href="#ranking" class="btn btn-primary">Смотреть рейтинг <span class="arrow">→</span></a>
 <a href="prices.html" class="btn btn-outline">Цены выкупа</a>
@@ -336,56 +443,7 @@ def index_page():
 </div>
 </section>
 
-<section class="section ranking-section" id="calc">
-<div class="container">
-<div class="calculator-shell">
-<div class="calculator-form">
-<span class="eyebrow">Калькулятор</span>
-<h2 class="calculator-title">Сколько предложит скупка?</h2>
-<p class="calculator-copy">Введите рыночную цену бутылки (аукцион, импортёр). Скупки обычно платят 67–72% от неё — так получается по таблице 1buyup. Это грубый ориентир, а не оценка конкретной бутылки.</p>
-<form id="calcForm" class="form-grid">
-<label class="full lbl">Рыночная цена бутылки, ₽<input class="field" id="market" type="number" min="1" step="100" inputmode="numeric" placeholder="например, 45000" required></label>
-<button class="btn btn-primary calculator-submit full" type="submit">Посчитать <span class="arrow">→</span></button>
-</form>
-</div>
-<aside class="calculator-result" aria-live="polite">
-<span class="result-label">Ориентир выкупа</span>
-<div class="result-price" id="resultPrice">—</div>
-<p class="result-note" id="resultNote">Введите цену и нажмите «Посчитать».</p>
-<div class="range"></div>
-<span class="result-disclaimer">Не является ценой сделки. Подлинность, этикетка, капсула, пробка, уровень жидкости, коробка и спрос меняют итог.</span>
-</aside>
-</div>
-<h3 class="sub">Как считается дисконт: таблица 1buyup, виски</h3>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>Позиция</th><th>Рынок</th><th>Готовы купить до</th><th>Дисконт</th></tr></thead>
-<tbody>{disc_rows}</tbody></table></div>
-<p class="note">Источник: 1buyup.ru, страница «Виски», цифры ориентировочные. По таблице компания платит не больше 67–72% рынка.</p>
-</div>
-</section>
-
-<section class="section" id="choose">
-<div class="container">
-<div class="section-top">
-<div><span class="eyebrow">Как выбрать</span><h2 class="section-title">Пять вопросов<br>перед сделкой</h2></div>
-<p class="section-copy">Ниша устроена однотипно: фото, предварительная цена, встреча и расчёт. Различия — в деталях.</p>
-</div>
-<div class="steps-grid">
-<article class="step"><div class="step-number">01</div><h3 class="step-title">Цена изменится?</h3><p>Главная боль клиента — цена меняется при встрече. 1buyup, TotalStok, Kupimalko и VykupAlko прямо обещают, что согласованная по фото цена не изменится. Спросите это письменно.</p></article>
-<article class="step"><div class="step-number">02</div><h3 class="step-title">«От» или «до»?</h3><p>700ml пишет «от» (нижняя граница), 1buyup — «до» (потолок). По Yamazaki 18 разброс 2,5 раза. Напрямую такие цифры сравнивать нельзя.</p></article>
-<article class="step"><div class="step-number">03</div><h3 class="step-title">Есть ли открытые цены?</h3><p>Конкретные цены публикуют четыре компании: 700ml, 1buyup, Red Decanter и SKUPKA-ALKOGOL. Остальные называют цену только после фото.</p></article>
-<article class="step"><div class="step-number">04</div><h3 class="step-title">Кто на самом деле?</h3><p>Независимых операторов меньше, чем сайтов: часть сайтов, вероятно, принадлежит одной компании (см. «Методику»). Запрос в «разные» скупки одной группы даст то же предложение.</p></article>
-<article class="step"><div class="step-number">05</div><h3 class="step-title">Что с обещаниями?</h3><p>«До 90%» и «до 100%» рыночной цены — маркетинг: реальный дисконт около 28–33%. Проверяйте цифры «10+ лет», «5000 сделок» и «97% выкупа» — это самозаявления.</p></article>
-</div>
-<h3 class="sub">Как подготовить бутылку к оценке</h3>
-<div class="trust-grid">
-<article class="trust-item"><div class="trust-symbol">1</div><h3 class="trust-title">Фото этикеток</h3><p>Сфотографируйте лицевую и обратную этикетки.</p></article>
-<article class="trust-item"><div class="trust-symbol">2</div><h3 class="trust-title">Капсула и пробка</h3><p>Покажите горлышко, капсулу, пробку и акцизную марку.</p></article>
-<article class="trust-item"><div class="trust-symbol">3</div><h3 class="trust-title">Уровень жидкости</h3><p>Снимите бутылку на просвет — уровень влияет на цену.</p></article>
-<article class="trust-item"><div class="trust-symbol">4</div><h3 class="trust-title">Общий вид и упаковка</h3><p>Коробка или тубус повышают цену: без коробки до −30% (данные Red Decanter).</p></article>
-</div>
-</div>
-</section>
+{shared_blocks()}
 
 <section class="section ranking-section" id="faq">
 <div class="container">
@@ -400,26 +458,6 @@ def index_page():
 <details><summary>Почему цена меняется при встрече?</summary><p>Предварительная оценка по фото не учитывает состояние бутылки вживую. Компании, которые гарантируют неизменность цены, оговаривают «если нет новых обстоятельств». Уточняйте условие до выезда.</p></details>
 <details><summary>Как быстро оценивают бутылку?</summary><p>Заявленные сроки — от 2 до 15 минут, у Room Alco около 30 минут, у 700ml до 24 часов. Скорость оценки не выделяет ни одного игрока.</p></details>
 <details><summary>Можно ли продать бутылку без коробки или акцизной марки?</summary><p>Часто можно: например, 1buyup берёт бутылки без коробки и без акцизной марки, а также алкоголь СССР. Но без коробки цена может быть ниже до 30% (по данным Red Decanter).</p></details>
-</div>
-</div>
-</section>
-
-<section class="section" id="method">
-<div class="container">
-<div class="section-top">
-<div><span class="eyebrow">Методика</span><h2 class="section-title">Как составлен<br>рейтинг</h2></div>
-<p class="section-copy">Что изучено, что не проверено и где возможны ошибки.</p>
-</div>
-<div class="prose" id="disclosure">
-<p><strong>Реклама и раскрытие.</strong> Места 1 и 2 занимают Room Alco и Diamant Alko — проекты владельца этого сайта, места закреплены заранее. Рейтинг не является независимым. Места 3–20 расставлены по прозрачности цен и полноте данных.</p>
-<p><strong>Источники.</strong> Изучены главные страницы сайтов и, где это удалось, страницы категорий. Если сайт закрыт для автоматического доступа, использованы фрагменты поисковой выдачи (это отмечено в карточке). Данные собраны 30 сентября 2026 г.</p>
-<p><strong>Что значит «не публикует».</strong> Цен нет на проверенных страницах. На неизученных подстраницах они могут быть.</p>
-<p><strong>Цены.</strong> Это заявленные компаниями ориентиры, а не оферта. Итог зависит от подлинности, этикетки, капсулы и пробки, уровня жидкости, упаковки, года, объёма и спроса.</p>
-<p><strong>Оценки.</strong> Числовые рейтинги не выставлялись: независимого источника нет, рейтинги на Яндекс Картах и 2ГИС не собирались. Показатели вида «10+ лет», «5000 сделок», «97% выкупа» — самозаявления компаний и не проверялись.</p>
-<p><strong>Не проверено.</strong> Skupka-Star, Vine-Co (vine-co.ru), VinomerPro, Skupix, СпецВыкуп, Collectors Community, «VIP Выкуп», Vikup-Vina, e-skupka.ru, Alko-vikup, «Скупка PRO»; отзывы на Яндекс Картах и 2ГИС; цены на подстраницах категорий.</p>
-<h3 class="sub">Возможно, один оператор</h3>
-<p>По шаблонам, текстам и контактам видны группы сайтов, которые, вероятно, принадлежат одному оператору. Это признаки, а не доказательство.</p>
-<div class="table-wrap"><table class="data"><thead><tr><th>Группа</th><th>Сайты</th></tr></thead><tbody>{clusters}</tbody></table></div>
 </div>
 </div>
 </section>
@@ -495,6 +533,7 @@ def company_page(c, i):
 <div class="pager">{nav}</div>
 </div>
 </main>
+{shared_blocks(1)}
 """ + footer(1)
 
 
@@ -509,7 +548,7 @@ def prices_page():
 <main class="page">
 <div class="container">
 <span class="eyebrow">Сводка по источникам</span>
-<h1 class="page-title">Цены выкупа</h1>
+<h1 class="page-title">Цены выкупа алкоголя в Москве</h1>
 <p class="lead">Все суммы в рублях. «От» — нижняя граница (700ml), «до» — потолок (1buyup, в скобках рыночная цена), «прибл.» — приблизительная цена на сайте. Прочерк — компания эту позицию не публикует. Сравнивать столбцы напрямую нельзя.</p>
 <input class="field search" id="priceSearch" type="search" placeholder="Поиск по позиции, например Macallan" aria-label="Поиск по позиции">
 <div class="table-wrap"><table class="data" id="priceTable">
@@ -522,6 +561,7 @@ def prices_page():
 <p class="note">Эти цифры — не рыночная цена и не гарантия выплаты. Один и тот же бренд может стоить по-разному из-за винтажа, объёма, уровня жидкости, состояния этикетки и комплектности. Например, Yamazaki 18: потолок 32 000 ₽ у 1buyup против «от 80 000 ₽» у 700ml — проверяйте цифру перед сделкой. Данные на {UPDATED}.</p>
 </div>
 </main>
+{shared_blocks()}
 """ + footer()
 
 
