@@ -183,9 +183,10 @@ def header(depth=0):
 <a href="{home}" class="nav-logo" aria-label="{SITE} — главная">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
 <nav class="nav-links" aria-label="Главная навигация">
 <a href="{home}#ranking">Где продать</a>
+<a href="{p}{TOPICS[0]['file']}">Элитный алкоголь</a>
+<a href="{p}{TOPICS[1]['file']}">Шампанское</a>
 <a href="{p}prices.html">Цены</a>
 <a href="{home}#calc">Калькулятор</a>
-<a href="{home}#choose">Перед сделкой</a>
 <a href="{home}#method">Методика оценки</a>
 </nav>
 <div class="header-actions">
@@ -207,7 +208,7 @@ def footer(depth=0):
 <p class="footer-logo-copy">Где продать алкоголь в Москве: рейтинг скупок коньяка, виски, вина и шампанского.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
-<a href="{home}#ranking">Рейтинг скупок</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
+<a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Элитное шампанское</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
 <a href="{home}#method">Методика оценки</a><a href="{home}#disclosure">Реклама</a></div></div>
 </div>
@@ -230,11 +231,12 @@ def badges(c):
     return out
 
 
-def row(c):
-    m = c["meta"]
+def row(c, m=None, rank=None):
+    m = m or c["meta"]
+    rank = rank or c["rank"]
     tags = "".join(f'<span class="pill">{e(t)}</span>' for t in m["tags"][:3]) + "".join(badges(c))
-    return f"""<a href="c/{c['slug']}.html" class="ranking-row" data-prices="{'1' if m['price'] not in ('Не публикует', 'Не проверено') else '0'}" data-own="{'1' if c['own'] else '0'}" data-fast="{'1' if c['slug'] in FAST else '0'}">
-<span class="rank-number">{c['rank']:02d}</span>
+    return f"""<a href="{PREFIX}c/{c['slug']}.html" class="ranking-row" data-prices="{'1' if m['price'] not in ('Не публикует', 'Не проверено') else '0'}" data-own="{'1' if c['own'] else '0'}" data-fast="{'1' if c['slug'] in FAST else '0'}">
+<span class="rank-number">{rank:02d}</span>
 <span><span class="company-name">{e(c['name']).upper()}</span><span class="company-site">{e(c['domain'])}</span></span>
 <span class="company-nomination">{e(m['nom'])}</span>
 <span class="company-metric"><strong>{e(m['speed'])}</strong>{e(m['speed_n'])}</span>
@@ -243,6 +245,9 @@ def row(c):
 <span class="row-arrow">→</span>
 </a>
 """
+
+
+PREFIX = ""
 
 
 # «быстрые» — заявляют оценку до 5 минут включительно
@@ -462,6 +467,7 @@ def index_page():
 </div>
 </section>
 
+{topic_cross("index", 0)}
 <section class="final-cta">
 <div class="container">
 <span class="eyebrow">Начните с фото</span>
@@ -565,9 +571,181 @@ def prices_page():
 """ + footer()
 
 
+TOPICS = [
+    dict(file="gde-prodat-elitnyy-alkogol.html", key="elite",
+         nav="Элитный алкоголь",
+         title=f"Где можно продать элитный алкоголь в Москве? Рейтинг скупок — {SITE}",
+         desc="Где продать элитный алкоголь в Москве: рейтинг скупок редкого виски, коньяка, вина и шампанского премиум-класса. Цены выкупа, скорость оценки по фото, выезд, условия сделки.",
+         h1="Где можно продать элитный алкоголь?",
+         eyebrow="Рейтинг · премиум и коллекционные бутылки",
+         lead="Сравнение скупок, которые берут премиальный и коллекционный алкоголь: редкий виски, выдержанный коньяк, марочное вино и шампанское. Кто публикует цены на дорогие позиции, как быстро оценивает по фото и на каких условиях приезжает."),
+    dict(file="gde-prodat-elitnoe-shampanskoe.html", key="champagne",
+         nav="Шампанское",
+         title=f"Где можно продать элитное шампанское в Москве? Рейтинг скупок — {SITE}",
+         desc="Где продать элитное шампанское в Москве: рейтинг скупок Dom Pérignon, Cristal, Krug, Salon. Цены выкупа, скорость оценки по фото, выезд, что влияет на стоимость.",
+         h1="Где можно продать элитное шампанское?",
+         eyebrow="Рейтинг · Dom Pérignon, Cristal, Krug, Salon",
+         lead="Сравнение скупок, которые покупают шампанское премиум-класса: винтажные кюве, розовое, большие форматы. Показываем, у кого есть открытые цены на шампанское, а у кого сумму называют только после фото."),
+]
+TOPIC_BY_KEY = {tp["key"]: tp for tp in TOPICS}
+
+CHAMP_WORDS = ("Cristal", "Dom Pérignon", "Krug", "Salon", "Veuve", "Bollinger")
+CHAMP_ROWS = [r for r in PRICES if r[0].startswith(CHAMP_WORDS)]
+
+
+def champ_count(col):
+    return sum(1 for r in CHAMP_ROWS if r[col] not in ("—", ""))
+
+
+def ranked_cards(key):
+    """Возвращает [(карточка, meta, место)] для тематической страницы."""
+    by = {c["domain"]: c for c in CARDS}
+    if key == "elite":
+        order = ["room-alco.ru", "diamant-alko.ru", "reddecanter.ru", "700ml.ru", "1buyup.ru", "skupka-alkogol.ru"]
+        tail_low = ["cupajclub.ru", "alkoprikup.ru"]  # заявляют, что берут и бюджетные позиции
+        rest = [c["domain"] for c in CARDS if c["domain"] not in order + tail_low]
+        order += rest + tail_low
+        over = {
+            "room-alco.ru": dict(nom="Круглосуточная оценка, хранение бутылок, подарочные коробки"),
+            "diamant-alko.ru": dict(nom="Остатки ресторанов и баров, опт от 10 бутылок"),
+            "reddecanter.ru": dict(nom="Ультрапремиум: Macallan M, Yamazaki 25, Dalmore 35", price="10 позиций", price_n="до 5 000 000 ₽"),
+            "700ml.ru": dict(nom="Самый подробный прайс: Petrus, Louis XIII, Macallan", price="21 позиция", price_n="цены «от»"),
+            "1buyup.ru": dict(nom="Macallan 25 и другой виски: рынок и потолок выкупа"),
+            "skupka-alkogol.ru": dict(nom="Ценовые сегменты до «свыше 100 000 ₽»"),
+            "cupajclub.ru": dict(nom="Берёт и бюджетные позиции — для элитного сегмента не профильная"),
+            "alkoprikup.ru": dict(nom="Берёт и бюджетные позиции — для элитного сегмента не профильная"),
+        }
+    else:
+        order = ["room-alco.ru", "diamant-alko.ru", "700ml.ru", "reddecanter.ru"]
+        rest = [c["domain"] for c in CARDS if c["domain"] not in order]
+        order += rest
+        over = {
+            "room-alco.ru": dict(nom="Круглосуточная оценка по фото, хранение, коробки и футляры"),
+            "diamant-alko.ru": dict(nom="Остатки шампанского у ресторанов, баров и магазинов (от 10 бутылок)"),
+            "700ml.ru": dict(nom="Самый подробный прайс на шампанское", price=f"{champ_count(1)} позиций", price_n="цены «от»"),
+            "reddecanter.ru": dict(nom="Редкие кюве: Salon, Krug, Dom Pérignon P2", price=f"{champ_count(3)} позиции", price_n="приблизительные"),
+        }
+        for c in CARDS:
+            if c["domain"] not in over:
+                over[c["domain"]] = dict(price="Не публикует", price_n="цены на шампанское")
+    out = []
+    for i, d in enumerate(order, 1):
+        c = by[d]
+        m = dict(c["meta"])
+        m.update(over.get(d, {}))
+        if key == "champagne" and d in ("room-alco.ru", "diamant-alko.ru"):
+            m["price"], m["price_n"] = "Не публикует", "цены на шампанское"
+        out.append((c, m, i))
+    return out
+
+
+def topic_extra(key, depth):
+    p = "../" * depth
+    if key == "elite":
+        seg = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td></tr>" for a, b in SEG)
+        ex = [("Macallan in Lalique 55", "5 000 000 ₽", "Red Decanter, приблизительно"),
+              ("Highland Park 50", "750 000 ₽", "Red Decanter, приблизительно"),
+              ("Dalmore 35", "450 000 ₽", "Red Decanter, приблизительно"),
+              ("Yamazaki 25", "400 000 ₽", "Red Decanter, приблизительно"),
+              ("Macallan 25", "180 000 ₽ (рынок ~250 000 ₽)", "1buyup, «до»"),
+              ("Macallan M Decanter", "160 000 ₽", "Red Decanter, приблизительно"),
+              ("Hennessy Richard Crystal Decanter", "120 000 ₽", "SKUPKA-ALKOGOL, приблизительно"),
+              ("Rémy Martin Louis XIII", "100 000 ₽", "700ml «от»; SKUPKA-ALKOGOL, приблизительно"),
+              ("Petrus 2006", "200 000 ₽", "700ml, «от»")]
+        exr = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td><td>{e(c)}</td></tr>" for a, b, c in ex)
+        return f"""<section class="section" id="topic">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Что считается элитным</span><h2 class="section-title">Сколько стоит<br>элитный алкоголь</h2></div>
+<p class="section-copy">Граница между обычным и элитным алкоголем условна. Ориентир для выкупа — премиум-класс от 10 000 ₽ и супер-премиум свыше 100 000 ₽.</p>
+</div>
+<div class="two-col">
+<div><h3 class="sub" style="margin-top:0">Ценовые сегменты (SKUPKA-ALKOGOL)</h3><div class="table-wrap"><table class="data"><thead><tr><th>Категория</th><th>Стоимость</th></tr></thead><tbody>{seg}</tbody></table></div>
+<p class="note">Цифры ориентировочные, не рыночная цена и не гарантия выплаты.</p></div>
+<div><h3 class="sub" style="margin-top:0">Как выбрать скупку для дорогих бутылок</h3><div class="prose">
+<p>Для редких и дорогих позиций важнее всего подлинность и экспертиза. Red Decanter заявляет оценку сомелье, 700ml публикует самый подробный прайс, 1buyup показывает и рыночную цену, и потолок выкупа.</p>
+<p>Просите письменно зафиксировать сумму после фото и уточняйте, чем подтверждается подлинность. Для партии из нескольких бутылок запросите предложения у двух-трёх компаний из разных групп (см. «Возможно, один оператор»).</p>
+<p>Упаковка важна: без оригинальной коробки цена бывает ниже до 30% (данные Red Decanter). Сохраните тубус, футляр и документы.</p></div></div>
+</div>
+<h3 class="sub">Примеры дорогих позиций из прайсов</h3>
+<div class="table-wrap"><table class="data"><thead><tr><th>Позиция</th><th>Цена</th><th>Источник</th></tr></thead><tbody>{exr}</tbody></table></div>
+<p class="note">Заявленные компаниями ориентиры, не оферта. Полный список — на странице <a class="text-link" href="{p}prices.html">«Цены выкупа»</a>.</p>
+</div>
+</section>
+"""
+    rows = "".join(f"<tr><td>{e(r[0])}</td><td class='{'dash' if r[1]=='—' else ''}'>{e(r[1])}</td><td class='{'dash' if r[3]=='—' else ''}'>{e(r[3])}</td></tr>" for r in CHAMP_ROWS)
+    return f"""<section class="section" id="topic">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Цены на шампанское</span><h2 class="section-title">Сколько платят<br>за шампанское</h2></div>
+<p class="section-copy">Открытые цены на шампанское публикуют только две компании из 20: 700ml и Red Decanter. У остальных сумму называют после того, как вы пришлёте фото.</p>
+</div>
+<div class="table-wrap"><table class="data"><thead><tr><th>Позиция</th><th>700ml (от)</th><th>Red Decanter (прибл.)</th></tr></thead><tbody>{rows}</tbody></table></div>
+<p class="note">Заявленные компаниями ориентиры, не оферта. Позиции сравнивать напрямую нельзя: у 700ml цена «от», у Red Decanter приблизительная; у Krug разные объёмы (0,75 л и 1,5 л).</p>
+<h3 class="sub">От чего зависит цена шампанского</h3>
+<div class="factors">
+<article><h3>Кюве и бренд</h3><p>Престижные кюве — Dom Pérignon, Cristal, Krug, Salon — стоят дороже обычного брют. Розовое и позднее выпускаемое P2 оцениваются отдельно.</p></article>
+<article><h3>Год и объём</h3><p>Винтаж влияет на цену: Dom Pérignon 2010 — от 16 000 ₽ у 700ml, P2 2002 — около 25 000 ₽ у Red Decanter. Большой формат дороже: Krug Grande Cuvée 1,5 л около 25 000 ₽ против 12 000 ₽ за 0,75 л.</p></article>
+<article><h3>Упаковка и сохранность</h3><p>Оригинальная коробка, этикетка, капсула и проволочная уздечка без повреждений. Без коробки цена бывает ниже до 30% (данные Red Decanter).</p></article>
+</div>
+</div>
+</section>
+"""
+
+
+def topic_cross(cur_key, depth):
+    p = "../" * depth
+    home = p or "./"
+    items = [(home + "#ranking", "Где можно продать алкоголь в Москве", "Общий рейтинг 20 скупок")]
+    for tp in TOPICS:
+        if tp["key"] != cur_key:
+            items.append((p + tp["file"], tp["h1"].rstrip("?"), "Отдельный рейтинг"))
+    items.append((p + "prices.html", "Цены выкупа алкоголя", "Сводка цен по источникам"))
+    cards = "".join(f'<a class="cross" href="{h}"><strong>{e(a)}</strong><span>{e(b)} →</span></a>' for h, a, b in items)
+    return f"""<section class="section"><div class="container"><h2 class="sub" style="margin-top:0">Другие рейтинги</h2><div class="cross-grid">{cards}</div></div></section>
+"""
+
+
+def topic_page(tp):
+    rows = ranked_cards(tp["key"])
+    rows_html = "".join(row(c, m, i) for c, m, i in rows)
+    return head(tp["title"], tp["desc"]) + header() + f"""
+<main id="top">
+<section class="topic-hero">
+<div class="container">
+<span class="eyebrow">{e(tp['eyebrow'])}</span>
+<h1 class="page-title">{e(tp['h1'])}</h1>
+<p class="lead">{e(tp['lead'])}</p>
+<div class="hero-buttons"><a href="#ranking" class="btn btn-primary">Смотреть рейтинг <span class="arrow">→</span></a><a href="#calc" class="btn btn-outline">Калькулятор выкупа</a></div>
+</div>
+</section>
+
+<section class="section ranking-section" id="ranking">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Рейтинг</span><h2 class="section-title">{e(tp['nav'] if tp['key']=='champagne' else 'Скупки элитного алкоголя')}<br>в Москве</h2></div>
+<p class="section-copy">{'Места 1–2 занимают проекты автора сайта. Далее — компании, у которых есть открытые цены на шампанское, затем остальные в порядке общего рейтинга.' if tp['key']=='champagne' else 'Места 1–2 занимают проекты автора сайта. Далее — компании, профильные для дорогих и редких бутылок, в конце — те, кто заявляет и бюджетные позиции.'}</p>
+</div>
+<div class="ranking-table" id="rankingTable">
+<div class="ranking-header"><span>Место</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
+{rows_html}
+</div>
+<p class="note">Сроки оценки и режимы работы — заявления компаний. «Не публикует» значит, что цен нет на проверенных страницах сайта. Порядок мест 3–20 на этой странице составлен по профильности для темы и полноте данных, а не по качеству услуг.</p>
+</div>
+</section>
+
+{topic_extra(tp['key'], 0)}
+{shared_blocks()}
+{topic_cross(tp['key'], 0)}
+</main>
+""" + footer()
+
+
 def main():
     (ROOT / "index.html").write_text(index_page(), encoding="utf-8")
     (ROOT / "prices.html").write_text(prices_page(), encoding="utf-8")
+    for tp in TOPICS:
+        (ROOT / tp["file"]).write_text(topic_page(tp), encoding="utf-8")
     (ROOT / "c").mkdir(exist_ok=True)
     for i, c in enumerate(CARDS):
         (ROOT / "c" / f"{c['slug']}.html").write_text(company_page(c, i), encoding="utf-8")
