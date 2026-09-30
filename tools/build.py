@@ -482,6 +482,136 @@ def index_page():
     return body
 
 
+# ---------------------------------------------------------------- карточка компании: факты и иллюстрация
+ND = "не указан"
+FACTS = {
+    "room-alco.ru": ("+7 (930) 935-31-48", "Info@whiskeygram.ru", "Москва, ул. Маршала Катукова, 24к6", "WhatsApp, Telegram, Max"),
+    "diamant-alko.ru": ("+7 (930) 935-32-06 (WhatsApp; телефона в шапке сайта нет)", "", "Москва, ул. Петровка, 7", "WhatsApp, Telegram @evgenich322, Max"),
+    "700ml.ru": ("+7 (977) 720-70-73", "24h@700ml.ru", "Москва, Пресненская наб., 2 (ТЦ «Афимолл») — место встречи", "WhatsApp, Telegram, Max"),
+    "1buyup.ru": ("+7 (965) 340-66-00", "fine@1buyup.ru", "Москва, Тверская ул., 7 (м. Охотный Ряд)", "WhatsApp, Viber, Telegram, Max"),
+    "reddecanter.ru": ("8 (495) 740-65-67, +7 (999) 546-63-03", "info@reddecanter.ru", "Москва, ул. Викторенко, 16 стр. 1, оф. 408 (м. Аэропорт)", "Telegram, Max"),
+    "skupka-alkogol.ru": ("8 (910) 453-99-08", "info@skupka-alkogol.ru", "Москва, ул. Дорожная, 54 стр. 1 (м. Аннино)", "Telegram, Max"),
+    "vykup-alko.ru": ("+7 (925) 875-28-20", "vykup.alko@yandex.ru", ND, "Telegram"),
+    "alkoprikup.ru": ("+7 (929) 102-55-55", "info@alkoprikup.ru", "Москва, ул. Зорге, 17А", "Telegram, Max"),
+    "sellmewine.ru": ("+7 (905) 714-82-82", "info@sellmewine.ru", "Москва, Ленинский пр-т, 44", "WhatsApp, Telegram, Max"),
+    "skup-ka.ru": ("+7 (925) 986-34-06", "sale@skup-ka.ru", "Москва, ул. Руставели, 14с6", "WhatsApp, Telegram, Max"),
+    "kupimalko.ru": ("+7 (929) 557-44-60", "kupimalko@mail.ru", ND, "WhatsApp, Telegram"),
+    "cupajclub.ru": ("+7 (499) 755-93-73, +7 (925) 215-63-36", "", "Москва, Варшавское ш., 170Б стр. 2", "Telegram, Max"),
+    "probkabar.com": ("+7 (968) 096-75-58 (в описании страницы также +7 (925) 929-63-01)", "sales@probkabar.com", ND, "Telegram skupkapremium"),
+    "sellawine.ru": ("+7 (901) 578-11-16", "alcoskupka.ru@gmail.com", ND, ""),
+    "alcobuyer.ru": ("+7 (916) 033-62-25", "alcobuyer@mail.ru", ND, "Telegram"),
+    "oldcognac.ru": ("8 (903) 535-50-20", "sale@oldcognac.ru", "Москва, ул. Академика Челомея, 11", "WhatsApp, Telegram, Max"),
+    "alcovikup.ru": ("+7 (977) 540-09-99", "", "Москва, МО, Казань (заявлено 11 офисов)", "WhatsApp, Telegram"),
+    "prodat-alko.ru": ("+7 (985) 991-15-56", "", ND, "WhatsApp, Telegram"),
+    "alkolombard.ru": ("+7 (999) 988-67-77", "", ND, "WhatsApp, Telegram, Max"),
+    "vikup-alco.ru": ("+7 (981) 268-10-45 (WhatsApp, Telegram, Viber)", "", "Санкт-Петербург, Апраксин пер., 15", ""),
+}
+assert set(FACTS) == {c["domain"] for c in CARDS}
+
+# какие бутылки рисовать на обложке: по специализации из анализа
+SHAPES = {
+    "reddecanter.ru": ["champagne", "whisky", "decanter", "champagne"],
+    "skupka-alkogol.ru": ["decanter", "cognac", "glass", "cognac"],
+    "700ml.ru": ["whisky", "wine", "champagne", "decanter"],
+    "1buyup.ru": ["whisky", "whisky", "glass", "decanter"],
+    "room-alco.ru": ["whisky", "decanter", "wine", "champagne"],
+    "diamant-alko.ru": ["wine", "champagne", "whisky", "wine", "champagne"],
+}
+PALETTES = [("#431f2a", "#6b3342", "#d1ac6b"), ("#32151e", "#5a2a3a", "#e0c48c"),
+            ("#3a2418", "#6a4329", "#d1ac6b"), ("#2b1a2a", "#573552", "#d9b878")]
+
+
+def bottle(kind, x, h, col, rnd):
+    """Силуэт бутылки с центром по x и высотой h, основание на y=470."""
+    base = 470
+    top = base - h
+    w = {"whisky": 120, "cognac": 130, "decanter": 150, "wine": 100, "champagne": 112, "glass": 110}[kind]
+    a, b, gold = col
+    if kind == "glass":
+        gh = h * 0.45
+        y0 = base - gh
+        return (f'<path d="M{x-w/2:.0f} {y0:.0f} L{x+w/2:.0f} {y0:.0f} L{x+w/2-10:.0f} {base} L{x-w/2+10:.0f} {base} Z" fill="url(#glass)" stroke="{gold}" stroke-opacity=".45"/>'
+                f'<path d="M{x-w/2+6:.0f} {y0+gh*0.45:.0f} L{x+w/2-6:.0f} {y0+gh*0.45:.0f} L{x+w/2-12:.0f} {base-4} L{x-w/2+12:.0f} {base-4} Z" fill="{gold}" fill-opacity=".55"/>')
+    neck = {"whisky": 26, "cognac": 24, "decanter": 30, "wine": 22, "champagne": 26}[kind]
+    shoulder = top + h * {"whisky": .30, "cognac": .36, "decanter": .34, "wine": .34, "champagne": .42}[kind]
+    L, R = x - w / 2, x + w / 2
+    d = (f'M{x-neck/2:.0f} {top:.0f} L{x+neck/2:.0f} {top:.0f} L{x+neck/2:.0f} {top+h*.12:.0f} '
+         f'C{x+neck/2:.0f} {shoulder-h*.1:.0f} {R:.0f} {shoulder-h*.04:.0f} {R:.0f} {shoulder+h*.08:.0f} '
+         f'L{R:.0f} {base-10} Q{R:.0f} {base} {R-10:.0f} {base} L{L+10:.0f} {base} Q{L:.0f} {base} {L:.0f} {base-10} '
+         f'L{L:.0f} {shoulder+h*.08:.0f} C{L:.0f} {shoulder-h*.04:.0f} {x-neck/2:.0f} {shoulder-h*.1:.0f} {x-neck/2:.0f} {top+h*.12:.0f} Z')
+    cap = gold if kind != "wine" else "#2a1219"
+    ly = shoulder + h * .18
+    lh = h * .30
+    return (f'<path d="{d}" fill="url(#glass)" stroke="{gold}" stroke-opacity=".5"/>'
+            f'<rect x="{x-neck/2-2:.0f}" y="{top-8:.0f}" width="{neck+4}" height="14" rx="3" fill="{cap}"/>'
+            f'<rect x="{L+8:.0f}" y="{ly:.0f}" width="{w-16}" height="{lh:.0f}" rx="3" fill="#f4ead6" fill-opacity=".92"/>'
+            f'<rect x="{L+14:.0f}" y="{ly+lh*.22:.0f}" width="{w-28}" height="3" fill="{a}" fill-opacity=".7"/>'
+            f'<rect x="{L+22:.0f}" y="{ly+lh*.5:.0f}" width="{w-44}" height="3" fill="{a}" fill-opacity=".45"/>'
+            f'<path d="M{L+10:.0f} {shoulder+h*.06:.0f} L{L+10:.0f} {base-18}" stroke="#fff" stroke-opacity=".18" stroke-width="5" stroke-linecap="round"/>')
+
+
+def cover_svg(c):
+    import random
+    rnd = random.Random(c["domain"])
+    col = PALETTES[rnd.randrange(len(PALETTES))]
+    a, b, gold = col
+    kinds = SHAPES.get(c["domain"]) or [rnd.choice(["whisky", "cognac", "wine", "champagne", "decanter"]) for _ in range(rnd.choice([3, 4, 4]))]
+    n = len(kinds)
+    span = 1200 * .62
+    x0 = 1200 * .5 - span / 2
+    out = []
+    for i, k in enumerate(kinds):
+        x = x0 + span * (i + .5) / n
+        h = {"whisky": 250, "cognac": 240, "decanter": 215, "wine": 300, "champagne": 310, "glass": 200}[k] * rnd.uniform(.92, 1.08)
+        out.append(bottle(k, x, h, col, rnd))
+    dots = "".join(f'<circle cx="{rnd.randrange(60,1140)}" cy="{rnd.randrange(40,300)}" r="{rnd.randrange(14,48)}" fill="{gold}" fill-opacity="{rnd.uniform(.05,.14):.2f}"/>' for _ in range(14))
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" role="img" aria-label="Иллюстрация: {e(c['name'])}">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{a}"/><stop offset="1" stop-color="{b}"/></linearGradient>
+<linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1c0c12" stop-opacity=".92"/><stop offset=".5" stop-color="{b}" stop-opacity=".9"/><stop offset="1" stop-color="#1c0c12" stop-opacity=".95"/></linearGradient>
+<linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{gold}" stop-opacity=".28"/><stop offset="1" stop-color="{gold}" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="1200" height="520" fill="url(#bg)"/>
+{dots}
+<rect x="0" y="470" width="1200" height="50" fill="url(#floor)"/>
+<rect x="0" y="470" width="1200" height="2" fill="{gold}" fill-opacity=".6"/>
+{''.join(out)}
+</svg>
+"""
+
+
+def write_covers():
+    d = ROOT / "assets" / "ill"
+    d.mkdir(parents=True, exist_ok=True)
+    for c in CARDS:
+        (d / f"{c['slug']}.svg").write_text(cover_svg(c), encoding="utf-8")
+
+
+def cover_figure(c):
+    """Обложка: реальный скриншот assets/shots/<slug>.(jpg|png|webp), если он есть, иначе иллюстрация."""
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        if (ROOT / "assets" / "shots" / f"{c['slug']}.{ext}").exists():
+            return (f'<figure class="cover"><img src="../assets/shots/{c["slug"]}.{ext}" alt="Главная страница {e(c["domain"])}" loading="lazy">'
+                    f'<figcaption>Главная страница сайта {e(c["domain"])}</figcaption></figure>')
+    return (f'<figure class="cover"><img src="../assets/ill/{c["slug"]}.svg" alt="Иллюстрация: {e(c["name"])}" width="1200" height="520">'
+            f'<figcaption>Иллюстрация: {e(c["name"])}</figcaption></figure>')
+
+
+def facts_table(c):
+    phone, email, addr, msg = FACTS[c["domain"]]
+    rows = [("Сайт", f'<a href="https://{e(c["domain"])}" rel="{"sponsored noopener" if c["own"] else "nofollow noopener"}" target="_blank">{e(c["domain"])}</a>')]
+    rows.append(("Телефон", e(phone)))
+    rows.append(("График работы", e(mode_of(c))))
+    rows.append(("Адрес", e(addr)))
+    if email:
+        rows.append(("Почта", e(email)))
+    if msg:
+        rows.append(("Мессенджеры", e(msg)))
+    rows.append(("Скорость оценки", e(c["speed"])))
+    rows.append(("Цены", e(c["prices"])))
+    return '<table class="facts-table"><tbody>' + "".join(f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in rows) + "</tbody></table>"
+
+
 def company_prices(c):
     col = {"700ml.ru": 1, "1buyup.ru": 2, "reddecanter.ru": 3, "skupka-alkogol.ru": 4}.get(c["domain"])
     if col is None:
@@ -523,13 +653,15 @@ def company_page(c, i):
 <nav class="crumbs"><a href="../">Рейтинг</a> / {e(c['name'])}</nav>
 <span class="eyebrow">Место {c['rank']} из 20</span>
 <h1 class="page-title">{e(c['name'])}</h1>
-<p><a class="text-link" href="https://{e(c['domain'])}" rel="{rel}" target="_blank">{e(c['domain'])} <span class="arrow">↗</span></a></p>
+<p class="lead">Скупка алкоголя: {e(c['meta']['nom'][0].lower() + c['meta']['nom'][1:])}.</p>
 {note}{own}{warn}
-<dl class="facts">
-<div><dt>Контакты и режим</dt><dd>{e(c['contacts'])}</dd></div>
-<div><dt>Скорость оценки</dt><dd>{e(c['speed'])}</dd></div>
-<div><dt>Цены</dt><dd>{e(c['prices'])}</dd></div>
-</dl>
+{cover_figure(c)}
+<div class="badges">
+<div class="badge"><span>Место в рейтинге</span><strong>{c['rank']} из 20</strong></div>
+<div class="badge"><span>Оценка по фото</span><strong>{e(c['meta']['speed'])}</strong></div>
+<div class="badge"><span>Цены на сайте</span><strong>{e(c['meta']['price'])}</strong></div>
+</div>
+{facts_table(c)}
 <div class="proscons">
 <div><h2 class="sub">Плюсы</h2><ul class="list plus">{pros}</ul></div>
 <div><h2 class="sub">Минусы</h2><ul class="list minus">{cons}</ul></div>
@@ -747,6 +879,7 @@ def main():
     for tp in TOPICS:
         (ROOT / tp["file"]).write_text(topic_page(tp), encoding="utf-8")
     (ROOT / "c").mkdir(exist_ok=True)
+    write_covers()
     for i, c in enumerate(CARDS):
         (ROOT / "c" / f"{c['slug']}.html").write_text(company_page(c, i), encoding="utf-8")
     print("ok:", len(CARDS), "компаний,", len(PRICES), "строк цен,", len(RUM), "ром/арманьяк,", len(SEG), "сегментов")

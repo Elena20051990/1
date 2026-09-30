@@ -206,3 +206,18 @@ label.lbl{display:grid;gap:8px;color:var(--muted);font-size:13px;font-weight:600
 .cross strong{color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:24px;line-height:1.1}
 .cross span{color:var(--muted);font-size:13px}
 @media(max-width:850px){.cross-grid{grid-template-columns:1fr}.topic-hero{padding:44px 0 36px}}
+/* страница компании: обложка, бейджи, таблица фактов */
+.cover{margin:26px 0 22px}
+.cover img{display:block;width:100%;height:auto;border-radius:18px;border:1px solid var(--line)}
+.cover figcaption{margin-top:10px;color:var(--muted-2);font-size:13px;text-align:center}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:26px}
+.badge{padding:16px 20px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.badge span{display:block;color:var(--muted-2);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.badge strong{display:block;margin-top:4px;color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:24px;line-height:1.1}
+.facts-table{width:100%;margin:0 0 30px;border-collapse:separate;border-spacing:0 6px;font-size:15px}
+.facts-table th,.facts-table td{padding:16px 22px;text-align:left;vertical-align:top;background:#fff}
+.facts-table tr:nth-child(odd) th,.facts-table tr:nth-child(odd) td{background:var(--cream-2)}
+.facts-table th{width:34%;border-radius:12px 0 0 12px;color:var(--muted);font-weight:600}
+.facts-table td{border-radius:0 12px 12px 0;color:var(--text)}
+.facts-table a{color:var(--burgundy);font-weight:600;text-decoration:underline}
+@media(max-width:850px){.badges{grid-template-columns:1fr}.facts-table th{width:38%;padding:12px 14px}.facts-table td{padding:12px 14px}}
