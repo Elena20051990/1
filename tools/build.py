@@ -3,7 +3,7 @@
 
 Запуск:  python3 tools/build.py
 Результат: index.html, prices.html, c/<slug>.html в корне репозитория.
-Стили лежат в assets/base.css (из дизайн-образца) + assets/site.css (дополнения).
+Стили лежат в assets/style.css.
 """
 import html
 import re
@@ -168,9 +168,8 @@ def head(title, desc, depth=0):
 <meta name="description" content="{e(desc)}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{p}assets/base.css">
-<link rel="stylesheet" href="{p}assets/site.css">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{p}assets/style.css">
 </head>
 <body>
 """
@@ -179,7 +178,7 @@ def head(title, desc, depth=0):
 def header(depth=0):
     p = "../" * depth
     home = p or "./"
-    return f"""<header class="header scrolled" id="header">
+    return f"""<header class="header" id="header">
 <div class="container header-inner">
 <a href="{home}" class="nav-logo" aria-label="{SITE} — главная">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
 <nav class="nav-links" aria-label="Главная навигация">
