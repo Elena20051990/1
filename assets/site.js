@@ -58,4 +58,17 @@
         .catch(function () { msg.textContent = 'Не удалось отправить отзыв. Попробуйте позже.'; });
     });
   }
+  // Согласие на cookie: после нажатия плашка скрывается и больше не показывается
+  var bar = document.getElementById('cookieBar');
+  if (bar) {
+    var accepted = false;
+    try { accepted = localStorage.getItem('cookie_consent') === '1'; } catch (e) {}
+    if (!accepted) accepted = /(?:^|; )cookie_consent=1/.test(document.cookie);
+    if (!accepted) bar.hidden = false;
+    document.getElementById('cookieOk').addEventListener('click', function () {
+      try { localStorage.setItem('cookie_consent', '1'); } catch (e) {}
+      document.cookie = 'cookie_consent=1; max-age=31536000; path=/; SameSite=Lax';
+      bar.hidden = true;
+    });
+  }
 })();

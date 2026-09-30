@@ -217,6 +217,10 @@ def footer(depth=0):
 </div>
 </footer>
 {review_dialog()}
+<div class="cookie-bar" id="cookieBar" role="dialog" aria-label="Согласие на использование cookie" hidden>
+<p>Мы используем файлы cookie, чтобы сайт работал корректно и был удобнее. Продолжая пользоваться сайтом, вы соглашаетесь на их использование.</p>
+<button class="btn btn-primary" type="button" id="cookieOk">Согласен</button>
+</div>
 <script src="{p}assets/site.js"></script>
 </body>
 </html>

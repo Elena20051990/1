@@ -262,3 +262,9 @@ dialog.review .cc-actions{margin-top:14px;justify-content:flex-end}
 .market-card-wrap{display:flex;align-items:center;justify-content:flex-end;padding:44px 6%}
 .top-card{position:relative;top:auto;right:auto;transform:none;margin:0}
 @media(max-width:850px){.market-card-wrap{padding:30px 16px}}
+/* согласие на cookie */
+.cookie-bar{position:fixed;left:50%;bottom:20px;z-index:100;display:flex;align-items:center;gap:20px;width:min(calc(100% - 32px),760px);padding:16px 20px;transform:translateX(-50%);border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 18px 60px rgba(67,31,42,.22)}
+.cookie-bar[hidden]{display:none}
+.cookie-bar p{flex:1;color:var(--muted);font-size:13px;line-height:1.55}
+.cookie-bar .btn{min-height:44px;padding:0 26px;font-size:13px;white-space:nowrap}
+@media(max-width:600px){.cookie-bar{flex-direction:column;align-items:stretch;gap:12px}}
