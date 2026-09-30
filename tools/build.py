@@ -282,7 +282,7 @@ def shared_blocks(depth=0):
 <div class="calculator-form">
 <span class="eyebrow">Калькулятор</span>
 <h2 class="calculator-title">Сколько стоит ваш алкоголь при выкупе?</h2>
-<p class="calculator-copy">Хотите понять, за какую сумму можно продать коньяк, виски, вино или шампанское? Введите рыночную цену бутылки — аукционную или цену импортёра. Скупки обычно платят 67–72% от неё: так получается по таблице 1buyup. Это быстрый ориентир, а не оценка конкретной бутылки — точную сумму назовёт эксперт после фото и осмотра.</p>
+<p class="calculator-copy">Хотите понять, за какую сумму можно продать коньяк, виски, вино или шампанское? Введите рыночную цену бутылки — аукционную или цену импортёра. Скупки обычно платят 67–72% от неё: так получается по опубликованным таблицам цен скупок. Это быстрый ориентир, а не оценка конкретной бутылки — точную сумму назовёт эксперт после фото и осмотра.</p>
 <form id="calcForm" class="form-grid">
 <label class="full lbl">Рыночная цена бутылки, ₽<input class="field" id="market" type="number" min="1" step="100" inputmode="numeric" placeholder="например, 45000" required></label>
 <button class="btn btn-primary calculator-submit full" type="submit">Узнать стоимость <span class="arrow">→</span></button>
@@ -296,11 +296,11 @@ def shared_blocks(depth=0):
 <span class="result-disclaimer">Не является ценой сделки. Подлинность, этикетка, капсула, пробка, уровень жидкости, коробка и спрос меняют итоговую сумму.</span>
 </aside>
 </div>
-<h3 class="sub">Как считается дисконт: таблица 1buyup, виски</h3>
+<h3 class="sub">Как считается дисконт: опубликованные цены выкупа, виски</h3>
 <div class="table-wrap"><table class="data">
 <thead><tr><th>Позиция</th><th>Рынок</th><th>Готовы купить до</th><th>Дисконт</th></tr></thead>
 <tbody>{disc_rows}</tbody></table></div>
-<p class="note">Источник: 1buyup.ru, страница «Виски», цифры ориентировочные. Компания платит не больше 67–72% рынка. Реальные цены других скупок — на странице <a href="{p}prices.html" class="text-link">«Цены выкупа»</a>.</p>
+<p class="note">Источник: открытые таблицы цен скупок (раздел «Виски»), цифры ориентировочные. Скупка платит не больше 67–72% рынка. Реальные цены других скупок — на странице <a href="{p}prices.html" class="text-link">«Цены выкупа»</a>.</p>
 </div>
 </section>
 
@@ -398,11 +398,6 @@ def index_page():
 <div class="hero-buttons">
 <a href="#ranking" class="btn btn-primary">Смотреть рейтинг <span class="arrow">→</span></a>
 <a href="prices.html" class="btn btn-outline">Цены выкупа</a>
-</div>
-<div class="hero-stats">
-<div class="hero-stat"><span class="stat-value">20</span><span class="stat-label">Компаний<br>в рейтинге</span></div>
-<div class="hero-stat"><span class="stat-value">{priced}</span><span class="stat-label">Публикуют<br>цены</span></div>
-<div class="hero-stat"><span class="stat-value">≈ 28–33%</span><span class="stat-label">Типичный дисконт<br>к рынку</span></div>
 </div>
 </div>
 <div class="market-card-wrap">
@@ -632,13 +627,13 @@ def price_range(c, topic=None):
     """(диапазон, пояснение). Считается из прайса самой компании; у остальных — общий рыночный ориентир."""
     d = c["domain"]
     col = {"700ml.ru": 1, "1buyup.ru": 2, "reddecanter.ru": 3, "skupka-alkogol.ru": 4}.get(d)
-    generic = ("67–72% от рыночной цены бутылки", "Компания цены не публикует; указан типичный уровень выкупа по таблице 1buyup. Цены меняются — уточняйте перед сделкой.")
+    generic = ("67–72% от рыночной цены бутылки", "Компания цены не публикует; указан типичный уровень выкупа по открытым таблицам цен скупок. Цены меняются — уточняйте перед сделкой.")
     if topic == "champagne":
         if col in (1, 3):
             n = [x for r in CHAMP_ROWS for x in _nums(r[col])]
             return f"от {fmt_rub(min(n))} до {fmt_rub(max(n))} ₽", "По опубликованным позициям шампанского. Цены меняются — диапазон ориентировочный."
         return generic
-    claims = {"vykup-alko.ru": ("заявляет «до 90% рыночной цены»", "Заявление компании, не подтверждено: у 1buyup реальный потолок около 70%. Конкретных цен компания не публикует."),
+    claims = {"vykup-alko.ru": ("заявляет «до 90% рыночной цены»", "Заявление компании, не подтверждено: у скупок, публикующих цены, реальный потолок около 70%. Конкретных цен компания не публикует."),
               "alkoprikup.ru": ("заявляет «до 100% рыночной цены»", "Заявление компании, формулировка расплывчатая. Конкретных цен не публикует; окончательная сумма — после осмотра.")}
     if d in claims:
         return claims[d]
@@ -738,7 +733,7 @@ def company_card(c, m=None, topic=None, prefix="", hint=None):
     rng, rng_note = price_range(c, topic)
     examples = not hint.startswith(("Цены не", "Цены на шампанское не"))
     return f"""<article class="company-card" id="{c['slug']}" data-prices="{'1' if m['price'] not in ('Не публикует', 'Не проверено') else '0'}" data-fast="{'1' if c['slug'] in FAST else '0'}">
-<h3 class="cc-name">{e(c['name'])}</h3>
+<h3 class="cc-name"><a href="{prefix}c/{c['slug']}.html">{e(c['name'])}</a></h3>
 <div class="cc-body">
 <figure class="cc-img"><img src="{img}" alt="{e(alt)}" loading="lazy" width="1200" height="520"></figure>
 <div class="cc-main">
@@ -765,7 +760,7 @@ def summary_section():
     rows = [
         ("Живые отзывы на Яндекс Картах / 2ГИС", "Почти ни у кого."),
         ("Открытый прайс", "700ml, 1buyup, Red Decanter, SKUPKA-ALKOGOL."),
-        ("Честный дисконт", "Только 1buyup показывает рынок и потолок: ≈28–33%."),
+        ("Честный дисконт", "Рынок и потолок рядом показывает одна компания: ≈28–33%."),
         ("Гарантия «цена по фото = цена на встрече»", "1buyup, VykupAlko, Kupimalko, TotalStok (заявления, не аудит)."),
         ("Вероятные группы сайтов", "700ml + Alko Lombard + oldcognac; Red Decanter + SKUPKA-ALKOGOL; Cupaj Club + Alko Prikup."),
         ("Room Alco / Diamant Alko", "Услуги шире рынка, но независимой репутации и прайса нет."),
@@ -1004,7 +999,7 @@ def topic_extra(key, depth):
 <div><h3 class="sub" style="margin-top:0">Ценовые сегменты (SKUPKA-ALKOGOL)</h3><div class="table-wrap"><table class="data"><thead><tr><th>Категория</th><th>Стоимость</th></tr></thead><tbody>{seg}</tbody></table></div>
 <p class="note">Цифры ориентировочные, не рыночная цена и не гарантия выплаты.</p></div>
 <div><h3 class="sub" style="margin-top:0">Как выбрать скупку для дорогих бутылок</h3><div class="prose">
-<p>Для редких и дорогих позиций важнее всего подлинность и экспертиза. Red Decanter заявляет оценку сомелье, 700ml публикует самый подробный прайс, 1buyup показывает и рыночную цену, и потолок выкупа.</p>
+<p>Для редких и дорогих позиций важнее всего подлинность и экспертиза. Red Decanter заявляет оценку сомелье, 700ml публикует самый подробный прайс, а одна из компаний показывает рыночную цену рядом с потолком выкупа.</p>
 <p>Просите письменно зафиксировать сумму после фото и уточняйте, чем подтверждается подлинность. Для партии из нескольких бутылок запросите предложения у двух-трёх компаний из разных групп (см. «Возможно, один оператор»).</p>
 <p>Упаковка важна: без оригинальной коробки цена бывает ниже до 30% (данные Red Decanter). Сохраните тубус, футляр и документы.</p></div></div>
 </div>
