@@ -595,6 +595,7 @@ def facts_table(c):
         rows.append(("Мессенджеры", e(msg)))
     rows.append(("Скорость оценки", e(c["speed"])))
     rows.append(("Цены", e(c["prices"])))
+    rows.append(("Диапазон цен", e(price_range(c)[0]) + " <span class='muted'>— " + e(price_range(c)[1]) + "</span>"))
     return '<table class="facts-table"><tbody>' + "".join(f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in rows) + "</tbody></table>"
 
 
@@ -614,18 +615,47 @@ def price_of(name, col):
     raise KeyError(name)
 
 
+def _nums(val):
+    val = re.sub(r"\([^)]*\)", "", val.replace("\xa0", " "))
+    return [int(x.replace(" ", "")) for x in re.findall(r"\d{1,3}(?: \d{3})+|\d+", val)]
+
+
+def fmt_rub(n):
+    return f"{n:,}".replace(",", " ")
+
+
+def price_range(c, topic=None):
+    """(диапазон, пояснение). Считается из прайса самой компании; у остальных — общий рыночный ориентир."""
+    d = c["domain"]
+    col = {"700ml.ru": 1, "1buyup.ru": 2, "reddecanter.ru": 3, "skupka-alkogol.ru": 4}.get(d)
+    generic = ("67–72% от рыночной цены бутылки", "Компания цены не публикует; указан типичный уровень выкупа по таблице 1buyup. Цены меняются — уточняйте перед сделкой.")
+    if topic == "champagne":
+        if col in (1, 3):
+            n = [x for r in CHAMP_ROWS for x in _nums(r[col])]
+            return f"от {fmt_rub(min(n))} до {fmt_rub(max(n))} ₽", "По опубликованным позициям шампанского. Цены меняются — диапазон ориентировочный."
+        return generic
+    if col is None:
+        return generic
+    n = [x for r in PRICES for x in _nums(r[col])]
+    if d == "700ml.ru":
+        n += [x for _, v in RUM for x in _nums(v)]
+    lo, hi = min(n), max(n)
+    kind = {1: "цены «от»", 2: "цены «до»", 3: "приблизительные цены", 4: "приблизительные цены"}[col]
+    return f"от {fmt_rub(lo)} до {fmt_rub(hi)} ₽", f"По опубликованным позициям компании ({kind}). Цены меняются — диапазон ориентировочный."
+
+
 def price_hint(c, topic=None):
     d = c["domain"]
     if topic == "champagne":
         col = {"700ml.ru": 1, "reddecanter.ru": 3}.get(d)
         if col:
-            items = [f"{r[0]} — {r[col]}{'' if 'л' in r[col] or '(' in r[col] else ' ₽'}" for r in CHAMP_ROWS if r[col] not in ("—", "")][:3]
-            return "; ".join(items) + (" (цены «от»)" if col == 1 else " (приблизительно)")
+            return "Цены на шампанское не публикует"  # примеры не выводим: диапазон задаёт price_range
         return "Цены на шампанское не публикует — сумму называет после фото."
     if d == "700ml.ru":
         return f"Hennessy XO — от {price_of('Hennessy XO', 1)} ₽; Highland Park 18 — от {price_of('Highland Park 18', 1)} ₽; Cristal Brut 2012 — от {price_of('Cristal Brut 2012', 1)} ₽."
     if d == "1buyup.ru":
-        return f"Macallan 18 Sherry Oak — до {price_of('Macallan 18 Sherry Oak', 2)} ₽ (рынок в скобках); Yamazaki 18 — до {price_of('Yamazaki 18', 2)} ₽; Highland Park 18 — до {price_of('Highland Park 18', 2)} ₽."
+        ex = [("Macallan 18 Sherry Oak", 50000), ("Yamazaki 18", 32000), ("Highland Park 18", 10000)]
+        return "; ".join(f"{n} — до {fmt_rub(v)} ₽" for n, v in ex) + "."
     if d == "reddecanter.ru":
         return f"Macallan M Decanter — {price_of('Macallan M Decanter', 3)} ₽; Yamazaki 25 — {price_of('Yamazaki 25', 3)} ₽; Cristal Brut 2012 — {price_of('Cristal Brut 2012', 3)} ₽ (приблизительно)."
     if d == "skupka-alkogol.ru":
@@ -667,6 +697,8 @@ def company_card(c, m=None, topic=None, prefix="", hint=None):
     rel = "noopener nofollow"
     paras = "".join(f"<p>{e(x)}</p>" for x in overview(c))
     hint = hint or price_hint(c, topic)
+    rng, rng_note = price_range(c, topic)
+    examples = not hint.startswith(("Цены не", "Цены на шампанское не"))
     return f"""<article class="company-card" id="{c['slug']}" data-prices="{'1' if m['price'] not in ('Не публикует', 'Не проверено') else '0'}" data-fast="{'1' if c['slug'] in FAST else '0'}">
 <h3 class="cc-name">{e(c['name'])}</h3>
 <div class="cc-body">
@@ -681,7 +713,7 @@ def company_card(c, m=None, topic=None, prefix="", hint=None):
 </div>
 </div>
 <div class="cc-foot">
-<div class="cc-price"><span>Примерная цена</span><strong>{e(hint)}</strong></div>
+<div class="cc-price"><span>Диапазон цен</span><strong>{e(rng)}</strong><em>{e(rng_note)}{e(' Например: ' + hint) if examples else ''}</em></div>
 <div class="cc-actions">
 <a class="btn btn-outline" href="{prefix}c/{c['slug']}.html">Подробнее</a>
 <button class="btn btn-primary btn-review" type="button" data-company="{e(c['name'])}">Оставить отзыв</button>
