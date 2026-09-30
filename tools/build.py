@@ -402,13 +402,12 @@ def index_page():
 </div>
 </div>
 <div class="market-card-wrap">
-<aside class="market-card" aria-label="Сколько платят скупки относительно рынка">
-<div class="market-topline"><span><span class="market-dot"></span>Данные 1buyup.ru</span></div>
-<span class="market-label">Платят от рыночной цены</span>
-<div class="market-price">67–72%</div>
-<div class="market-change"><strong>−28…33%</strong><span>дисконт скупки</span></div>
-<p class="market-note">По таблице 1buyup на 6 позиций виски. Обещания «до 90%» и «до 100%» у других компаний — маркетинг.</p>
-<p class="market-disclaimer">Не является гарантией выкупа.<br>Итог зависит от состояния бутылки.</p>
+<aside class="top-card" aria-label="Топ компаний">
+<h2 class="top-title"><span>ТОП</span> компаний</h2>
+<ol class="top-list">
+{"".join(f'<li><a href="c/{c["slug"]}.html"><span class="tn">{e(c["name"])}</span><span class="tm">{e(c["meta"]["speed"])}</span></a></li>' for c in CARDS)}
+</ol>
+<a href="#method" class="top-how">Как составлен список?</a>
 </aside>
 </div>
 </div>

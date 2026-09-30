@@ -246,3 +246,19 @@ dialog.review textarea.field{padding:12px 16px;resize:vertical}
 dialog.review .cc-actions{margin-top:14px;justify-content:flex-end}
 @media(max-width:850px){.cc-body{grid-template-columns:1fr}.company-card{padding:18px}.cc-facts div{grid-template-columns:1fr;gap:2px}}
 .cc-price em{display:block;margin-top:6px;max-width:640px;color:var(--muted);font-size:12px;font-style:normal;line-height:1.5}
+/* ТОП компаний в шапке */
+.top-card{position:absolute;top:50%;right:6%;width:min(92%,560px);transform:translateY(-50%);padding:26px 28px 24px;background:rgba(255,255,255,.95);border:1px solid rgba(67,31,42,.1);border-radius:22px;box-shadow:0 20px 70px rgba(67,31,42,.16);backdrop-filter:blur(15px)}
+.top-title{margin-bottom:16px;color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:38px;font-weight:700;line-height:1}
+.top-title span{color:var(--gold-d)}
+.top-list{display:grid;grid-template-columns:1fr 1fr;gap:2px 22px;list-style:none}
+.top-list li{border-bottom:1px solid var(--line)}
+.top-list a{display:grid;gap:1px;padding:8px 0;transition:.2s}
+.top-list a:hover .tn{color:var(--gold-d)}
+.tn{color:var(--burgundy);font-size:15px;font-weight:700;line-height:1.25}
+.tm{color:var(--muted-2);font-size:11px}
+.top-how{display:inline-block;margin-top:18px;padding:12px 22px;border:1px solid var(--line);border-radius:12px;color:var(--burgundy);font-size:13px;font-weight:600;transition:.2s}
+.top-how:hover{border-color:var(--gold);background:var(--cream)}
+@media(max-width:850px){.top-card{position:static;width:100%;transform:none;padding:20px}.top-list{grid-template-columns:1fr}.top-title{font-size:32px}}
+.market-card-wrap{display:flex;align-items:center;justify-content:flex-end;padding:44px 6%}
+.top-card{position:relative;top:auto;right:auto;transform:none;margin:0}
+@media(max-width:850px){.market-card-wrap{padding:30px 16px}}
