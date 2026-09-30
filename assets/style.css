@@ -221,3 +221,27 @@ label.lbl{display:grid;gap:8px;color:var(--muted);font-size:13px;font-weight:600
 .facts-table td{border-radius:0 12px 12px 0;color:var(--text)}
 .facts-table a{color:var(--burgundy);font-weight:600;text-decoration:underline}
 @media(max-width:850px){.badges{grid-template-columns:1fr}.facts-table th{width:38%;padding:12px 14px}.facts-table td{padding:12px 14px}}
+/* карточки рейтинга */
+.company-list{display:grid;gap:26px}
+.company-card{padding:28px;border:1px solid var(--line);border-radius:20px;background:#fff}
+.company-card[hidden]{display:none}
+.cc-name{margin-bottom:18px;color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:clamp(32px,3.4vw,44px);font-weight:700;line-height:1}
+.cc-body{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr);gap:28px}
+.cc-img img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}
+.cc-facts{display:grid;gap:1px;margin-bottom:18px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:var(--line)}
+.cc-facts div{display:grid;grid-template-columns:130px 1fr;gap:12px;padding:12px 16px;background:var(--cream)}
+.cc-facts dt{color:var(--muted-2);font-size:12px;font-weight:600}
+.cc-facts dd{font-size:14px;line-height:1.5}
+.cc-facts a{color:var(--burgundy);font-weight:600;text-decoration:underline}
+.cc-text p{margin-bottom:12px;color:#403a39;font-size:15px;line-height:1.7}
+.cc-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:18px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.cc-price span{display:block;color:var(--muted-2);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.cc-price strong{display:block;margin-top:4px;max-width:640px;color:var(--burgundy);font-size:15px;line-height:1.5}
+.cc-actions{display:flex;flex-wrap:wrap;gap:12px}
+.cc-actions .btn{min-height:46px;font-size:13px;padding:0 24px}
+dialog.review{width:min(92vw,480px);padding:28px;border:1px solid var(--line);border-radius:18px;background:#fff;color:var(--text)}
+dialog.review::backdrop{background:rgba(50,21,30,.55)}
+dialog.review .lbl{margin-bottom:12px}
+dialog.review textarea.field{padding:12px 16px;resize:vertical}
+dialog.review .cc-actions{margin-top:14px;justify-content:flex-end}
+@media(max-width:850px){.cc-body{grid-template-columns:1fr}.company-card{padding:18px}.cc-facts div{grid-template-columns:1fr;gap:2px}}

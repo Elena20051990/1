@@ -216,6 +216,7 @@ def footer(depth=0):
 <div class="footer-bottom"><p>© 2026 {SITE}. Информация носит справочный характер.</p><p>Данные актуальны на {UPDATED}</p></div>
 </div>
 </footer>
+{review_dialog()}
 <script src="{p}assets/site.js"></script>
 </body>
 </html>
@@ -424,27 +425,14 @@ def index_page():
 <button class="chip" data-filter="prices">Публикуют цены</button>
 <button class="chip" data-filter="fast">Оценка до 5 минут</button>
 </div>
-<div class="ranking-table" id="rankingTable">
-<div class="ranking-header"><span>№</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
-{"".join(row(c) for c in CARDS)}
+<div class="company-list" id="rankingTable">
+{"".join(company_card(c) for c in CARDS)}
 </div>
 <p class="note">Сроки оценки и режимы работы — заявления компаний. Слова «не публикует» означают, что цен нет на проверенных страницах сайта.</p>
 </div>
 </section>
 
-<section class="section" id="compare">
-<div class="container">
-<div class="section-top">
-<div><span class="eyebrow">Сводная таблица</span><h2 class="section-title">Сравнение<br>условий</h2></div>
-<p class="section-copy">Режим работы, заявленная скорость предварительной оценки и публичность цен.</p>
-</div>
-<div class="table-wrap"><table class="data">
-<thead><tr><th>№</th><th>Компания</th><th>Режим</th><th>Скорость оценки</th><th>Цены</th></tr></thead>
-<tbody>
-{cmp_rows}
-</tbody></table></div>
-</div>
-</section>
+{compare_section([(c, c['meta']) for c in CARDS])}
 
 {shared_blocks()}
 
@@ -608,6 +596,138 @@ def facts_table(c):
     rows.append(("Скорость оценки", e(c["speed"])))
     rows.append(("Цены", e(c["prices"])))
     return '<table class="facts-table"><tbody>' + "".join(f"<tr><th>{k}</th><td>{v}</td></tr>" for k, v in rows) + "</tbody></table>"
+
+
+# ---------------------------------------------------------------- карточки рейтинга
+REVIEW_ENDPOINT = ""  # адрес, куда форма «Оставить отзыв» отправит JSON; пока не подключён
+
+
+def lf(s):
+    """С маленькой буквы, если слово не бренд/аббревиатура."""
+    return s[0].lower() + s[1:] if len(s) > 1 and s[0].isalpha() and s[0].isupper() and s[1].islower() and "а" <= s[0].lower() <= "я" else s
+
+
+def price_of(name, col):
+    for r in PRICES:
+        if r[0] == name:
+            return r[col]
+    raise KeyError(name)
+
+
+def price_hint(c, topic=None):
+    d = c["domain"]
+    if topic == "champagne":
+        col = {"700ml.ru": 1, "reddecanter.ru": 3}.get(d)
+        if col:
+            items = [f"{r[0]} — {r[col]}{'' if 'л' in r[col] or '(' in r[col] else ' ₽'}" for r in CHAMP_ROWS if r[col] not in ("—", "")][:3]
+            return "; ".join(items) + (" (цены «от»)" if col == 1 else " (приблизительно)")
+        return "Цены на шампанское не публикует — сумму называет после фото."
+    if d == "700ml.ru":
+        return f"Hennessy XO — от {price_of('Hennessy XO', 1)} ₽; Highland Park 18 — от {price_of('Highland Park 18', 1)} ₽; Cristal Brut 2012 — от {price_of('Cristal Brut 2012', 1)} ₽."
+    if d == "1buyup.ru":
+        return f"Macallan 18 Sherry Oak — до {price_of('Macallan 18 Sherry Oak', 2)} ₽ (рынок в скобках); Yamazaki 18 — до {price_of('Yamazaki 18', 2)} ₽; Highland Park 18 — до {price_of('Highland Park 18', 2)} ₽."
+    if d == "reddecanter.ru":
+        return f"Macallan M Decanter — {price_of('Macallan M Decanter', 3)} ₽; Yamazaki 25 — {price_of('Yamazaki 25', 3)} ₽; Cristal Brut 2012 — {price_of('Cristal Brut 2012', 3)} ₽ (приблизительно)."
+    if d == "skupka-alkogol.ru":
+        return "Коньяк VS / VSOP / XO — от 500 / 1 500 / 3 000 ₽; Hennessy Paradis — около 50 000 ₽ (приблизительно)."
+    if d == "sellawine.ru":
+        return "Цены не проверены."
+    return "Цены не публикует — сумму называет после фото."
+
+
+def overview(c):
+    m = c["meta"]
+    addr = FACTS[c["domain"]][2]
+    a = f"Адрес: {addr}." if addr != ND else "Адрес на сайте не указан."
+    mode = mode_of(c)
+    mode_s = f"Режим работы: {mode}." if mode != ND else "Режим работы на сайте не указан."
+    speed = c["speed"].rstrip(".") + "."
+    p1 = f"{c['name']} — {lf(m['nom'])}. {a} {mode_s} {speed}"
+    p2 = "Сильные стороны компании по данным её сайта: " + "; ".join(lf(x.rstrip(".")) for x in c["pros"][:4]) + "."
+    p3 = "Что учесть: " + "; ".join(lf(x.rstrip(".")) for x in c["cons"][:4]) + "."
+    if c["cluster"]:
+        mates = [d for n, mm in CLUSTERS if c["domain"] in mm for d in mm if d != c["domain"]]
+        p3 += f" Возможно, один оператор с сайтами: {', '.join(mates)}."
+    p3 += " Сроки и цены — заявления компании, мы их не проверяли."
+    return [p1, p2, p3]
+
+
+def card_image(c, prefix=""):
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        if (ROOT / "assets" / "shots" / f"{c['slug']}.{ext}").exists():
+            return f'{prefix}assets/shots/{c["slug"]}.{ext}', f"Главная страница {c['domain']}"
+    return f'{prefix}assets/ill/{c["slug"]}.svg', f"Иллюстрация: {c['name']}"
+
+
+def company_card(c, m=None, topic=None, prefix="", hint=None):
+    m = m or c["meta"]
+    addr = FACTS[c["domain"]][2]
+    mode = mode_of(c)
+    img, alt = card_image(c, prefix)
+    rel = "noopener nofollow"
+    paras = "".join(f"<p>{e(x)}</p>" for x in overview(c))
+    hint = hint or price_hint(c, topic)
+    return f"""<article class="company-card" id="{c['slug']}" data-prices="{'1' if m['price'] not in ('Не публикует', 'Не проверено') else '0'}" data-fast="{'1' if c['slug'] in FAST else '0'}">
+<h3 class="cc-name">{e(c['name'])}</h3>
+<div class="cc-body">
+<figure class="cc-img"><img src="{img}" alt="{e(alt)}" loading="lazy" width="1200" height="520"></figure>
+<div class="cc-main">
+<dl class="cc-facts">
+<div><dt>График работы</dt><dd>{e(mode)}</dd></div>
+<div><dt>Адрес</dt><dd>{e(addr)}</dd></div>
+<div><dt>Сайт</dt><dd><a href="https://{e(c['domain'])}" target="_blank" rel="{rel}">{e(c['domain'])}</a></dd></div>
+</dl>
+<div class="cc-text">{paras}</div>
+</div>
+</div>
+<div class="cc-foot">
+<div class="cc-price"><span>Примерная цена</span><strong>{e(hint)}</strong></div>
+<div class="cc-actions">
+<a class="btn btn-outline" href="{prefix}c/{c['slug']}.html">Подробнее</a>
+<button class="btn btn-primary btn-review" type="button" data-company="{e(c['name'])}">Оставить отзыв</button>
+</div>
+</div>
+</article>
+"""
+
+
+def compare_rows(rows):
+    return "\n".join(
+        f"<tr><td><a href='c/{c['slug']}.html'><strong>{e(c['name'])}</strong></a><br><span class='muted'>{e(c['domain'])}</span></td>"
+        f"<td>{e(mode_of(c))}</td><td>{e(m['speed'])}</td><td>{e(m['price'])}</td><td>{e(m['nom'])}</td></tr>"
+        for c, m in rows)
+
+
+def compare_section(rows, title="Сравнение<br>условий", copy="Режим работы, заявленная скорость предварительной оценки, публичность цен и специализация."):
+    return f"""<section class="section" id="compare">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Сравнительная таблица</span><h2 class="section-title">{title}</h2></div>
+<p class="section-copy">{copy}</p>
+</div>
+<div class="table-wrap"><table class="data">
+<thead><tr><th>Компания</th><th>Режим</th><th>Скорость оценки</th><th>Цены</th><th>Специализация</th></tr></thead>
+<tbody>
+{compare_rows(rows)}
+</tbody></table></div>
+</div>
+</section>
+"""
+
+
+def review_dialog():
+    return f"""<dialog id="reviewDialog" class="review">
+<form method="dialog" id="reviewForm" data-endpoint="{e(REVIEW_ENDPOINT)}">
+<h3 class="sub" style="margin:0 0 6px">Оставить отзыв</h3>
+<p class="muted" id="reviewCompany" style="margin-bottom:14px"></p>
+<label class="lbl">Ваше имя<input class="field" name="name" maxlength="80" autocomplete="name"></label>
+<label class="lbl">Оценка<select class="field" name="rating" required><option value="">Выберите</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label>
+<label class="lbl">Отзыв<textarea class="field" name="text" rows="5" maxlength="2000" required></textarea></label>
+<p class="muted" id="reviewMsg" role="status"></p>
+<div class="cc-actions"><button class="btn btn-outline" type="button" id="reviewCancel">Закрыть</button><button class="btn btn-primary" type="submit">Отправить</button></div>
+</form>
+</dialog>
+"""
 
 
 def company_prices(c):
@@ -838,7 +958,7 @@ def topic_cross(cur_key, depth):
 
 def topic_page(tp):
     rows = ranked_cards(tp["key"])
-    rows_html = "".join(row(c, m, i) for c, m, i in rows)
+    cards_html = "".join(company_card(c, m, topic=tp["key"]) for c, m, i in rows)
     return head(tp["title"], tp["desc"]) + header() + f"""
 <main id="top">
 <section class="topic-hero">
@@ -856,14 +976,14 @@ def topic_page(tp):
 <div><span class="eyebrow">Рейтинг</span><h2 class="section-title">{e(tp['nav'] if tp['key']=='champagne' else 'Скупки элитного алкоголя')}<br>в Москве</h2></div>
 <p class="section-copy">{'Сравнение по открытым ценам на шампанское, скорости оценки и условиям сделки. Как составлен список — в разделе «Методика».' if tp['key']=='champagne' else 'Сравнение скупок дорогих и редких бутылок по скорости оценки, ценам и условиям сделки. Как составлен список — в разделе «Методика».'}</p>
 </div>
-<div class="ranking-table" id="rankingTable">
-<div class="ranking-header"><span>№</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
-{rows_html}
+<div class="company-list" id="rankingTable">
+{cards_html}
 </div>
 <p class="note">Сроки оценки и режимы работы — заявления компаний. «Не публикует» значит, что цен нет на проверенных страницах сайта. Порядок компаний на этой странице составлен по профильности для темы и полноте данных, а не по качеству услуг; подробнее — в методике.</p>
 </div>
 </section>
 
+{compare_section([(c, m) for c, m, i in rows])}
 {topic_extra(tp['key'], 0)}
 {shared_blocks()}
 {topic_cross(tp['key'], 0)}

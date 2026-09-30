@@ -1,6 +1,6 @@
 (function () {
   // Фильтры рейтинга
-  var rows = document.querySelectorAll('#rankingTable .ranking-row');
+  var rows = document.querySelectorAll('#rankingTable .company-card');
   document.querySelectorAll('.chip').forEach(function (chip) {
     chip.addEventListener('click', function () {
       document.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
@@ -8,8 +8,7 @@
       var f = chip.dataset.filter;
       rows.forEach(function (r) {
         var show = f === 'all' || (f === 'prices' && r.dataset.prices === '1') || (f === 'fast' && r.dataset.fast === '1');
-        // места 1–2 (проекты автора) всегда остаются в списке, чтобы фильтр не искажал рейтинг
-        r.hidden = !(show || r.dataset.own === '1');
+        r.hidden = !show;
       });
     });
   });
@@ -34,6 +33,29 @@
       document.querySelectorAll('#priceTable tbody tr').forEach(function (tr) {
         tr.hidden = q && tr.cells[0].textContent.toLowerCase().indexOf(q) < 0;
       });
+    });
+  }
+  // Отзыв: диалог
+  var dlg = document.getElementById('reviewDialog');
+  if (dlg) {
+    var form = document.getElementById('reviewForm'), msg = document.getElementById('reviewMsg'), who = '';
+    document.addEventListener('click', function (ev) {
+      var b = ev.target.closest('.btn-review');
+      if (!b) return;
+      who = b.dataset.company;
+      document.getElementById('reviewCompany').textContent = who;
+      msg.textContent = '';
+      if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+    });
+    document.getElementById('reviewCancel').addEventListener('click', function () { dlg.close(); });
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var ep = form.dataset.endpoint;
+      if (!ep) { msg.textContent = 'Приём отзывов ещё не подключён к серверу — отзыв не отправлен.'; return; }
+      var data = Object.fromEntries(new FormData(form)); data.company = who;
+      fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+        .then(function (r) { if (!r.ok) throw 0; msg.textContent = 'Спасибо! Отзыв отправлен.'; form.reset(); })
+        .catch(function () { msg.textContent = 'Не удалось отправить отзыв. Попробуйте позже.'; });
     });
   }
 })();
