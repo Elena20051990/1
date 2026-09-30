@@ -71,4 +71,15 @@
       bar.hidden = true;
     });
   }
+  // Мобильное меню
+  var mb = document.getElementById('menuBtn'), hd = document.getElementById('header');
+  if (mb && hd) {
+    mb.addEventListener('click', function () {
+      var open = hd.classList.toggle('menu-open');
+      mb.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.getElementById('navLinks').addEventListener('click', function (ev) {
+      if (ev.target.tagName === 'A') { hd.classList.remove('menu-open'); mb.setAttribute('aria-expanded', 'false'); }
+    });
+  }
 })();

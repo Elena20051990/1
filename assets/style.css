@@ -272,3 +272,17 @@ dialog.review .cc-actions{margin-top:14px;justify-content:flex-end}
 .cc-text .cc-verdict{padding:14px 18px;border-left:3px solid var(--gold);border-radius:6px;background:#f6efe0}
 .cc-text strong{color:var(--burgundy)}
 .cc-name a{color:inherit;transition:color .2s}.cc-name a:hover{color:var(--gold-d)}
+/* меню шапки */
+.nav-links{gap:26px}
+.menu-btn{display:none;width:46px;height:46px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--burgundy);font-size:22px}
+.steps-list{margin:0 0 20px 22px;color:var(--muted);line-height:1.8}
+.steps-list li{margin-bottom:8px}
+.steps-list a{font-weight:600;text-decoration:underline}
+@media(max-width:1120px){
+.menu-btn{display:inline-grid;place-items:center}
+.nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;margin:0;padding:8px 24px 18px;border-bottom:1px solid var(--line);background:var(--cream)}
+.header.menu-open .nav-links{display:flex}
+.nav-links a{padding:14px 0;border-bottom:1px solid var(--line);font-size:16px}
+.header{position:sticky}
+}
+@media(max-width:850px){.header-cta{display:none}}

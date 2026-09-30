@@ -175,22 +175,30 @@ def head(title, desc, depth=0):
 """
 
 
+# Меню шапки: (подпись, ссылка). Ссылка на якорь главной начинается с «#», остальные — файлы в корне.
+NAV = [
+    ("Где продать", "#ranking"),
+    ("Элитный алкоголь", "gde-prodat-elitnyy-alkogol.html"),
+    ("Шампанское", "gde-prodat-elitnoe-shampanskoe.html"),
+    ("Цены", "prices.html"),
+    ("Методика", "metodika.html"),
+    ("О рейтинге", "o-reitinge.html"),
+]
+
+
 def header(depth=0):
     p = "../" * depth
     home = p or "./"
+    links = "\n".join(f'<a href="{(home if h.startswith("#") else p)}{h}">{e(l)}</a>' for l, h in NAV)
     return f"""<header class="header" id="header">
 <div class="container header-inner">
 <a href="{home}" class="nav-logo" aria-label="{SITE} — главная">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
-<nav class="nav-links" aria-label="Главная навигация">
-<a href="{home}#ranking">Где продать</a>
-<a href="{p}{TOPICS[0]['file']}">Элитный алкоголь</a>
-<a href="{p}{TOPICS[1]['file']}">Шампанское</a>
-<a href="{p}prices.html">Цены</a>
-<a href="{home}#calc">Калькулятор</a>
-<a href="{home}#method">Методика оценки</a>
+<nav class="nav-links" id="navLinks" aria-label="Главная навигация">
+{links}
 </nav>
 <div class="header-actions">
 <a href="{home}#calc" class="btn btn-primary header-cta">Оценить алкоголь <span class="arrow">→</span></a>
+<button class="menu-btn" id="menuBtn" type="button" aria-label="Меню" aria-expanded="false" aria-controls="navLinks">☰</button>
 </div>
 </div>
 </header>
@@ -210,7 +218,7 @@ def footer(depth=0):
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
 <a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Элитное шампанское</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
-<a href="{home}#method">Методика оценки</a><a href="{home}#disclosure">О рейтинге</a></div></div>
+<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a></div></div>
 </div>
 <p class="legal">Независимый рейтинг: составлен по открытым данным из разных источников, компании отобраны редакцией сайта. Сайт не оказывает и не продаёт услуги. Вся информация носит исключительно информационный характер и может быть устаревшей. Точную информацию уточняйте на сайтах компаний. Цены и сроки — заявления компаний, не оферта. Продажа алкоголя лицам младше 18 лет запрещена.</p>
 <div class="footer-bottom"><p>© 2026 {SITE}. Информация носит справочный характер.</p><p>Данные актуальны на {UPDATED}</p></div>
@@ -314,7 +322,7 @@ def shared_blocks(depth=0):
 <article class="step"><div class="step-number">01</div><h3 class="step-title">Цена изменится?</h3><p>Главная причина недовольства клиентов — цена меняется при встрече. 1buyup, TotalStok, Kupimalko и VykupAlko прямо обещают, что согласованная по фото сумма не изменится. Попросите подтвердить это в переписке до приезда специалиста.</p></article>
 <article class="step"><div class="step-number">02</div><h3 class="step-title">«От» или «до»?</h3><p>700ml пишет «от» (нижняя граница), 1buyup — «до» (потолок). По Yamazaki 18 разброс достигает 2,5 раза. Напрямую такие цифры сравнивать нельзя — уточняйте, что именно компания готова заплатить.</p></article>
 <article class="step"><div class="step-number">03</div><h3 class="step-title">Есть ли цены на сайте?</h3><p>Конкретные цены публикуют четыре компании: 700ml, 1buyup, Red Decanter и SKUPKA-ALKOGOL. Остальные называют сумму только после того, как вы пришлёте фото.</p></article>
-<article class="step"><div class="step-number">04</div><h3 class="step-title">Кто на самом деле?</h3><p>Независимых операторов меньше, чем сайтов: часть сайтов, вероятно, принадлежит одной компании (см. методику ниже). Запрос в «разные» скупки одной группы даст то же предложение.</p></article>
+<article class="step"><div class="step-number">04</div><h3 class="step-title">Кто на самом деле?</h3><p>Независимых операторов меньше, чем сайтов: часть сайтов, вероятно, принадлежит одной компании (см. <a class="text-link" href="{p}metodika.html">методику</a>). Запрос в «разные» скупки одной группы даст то же предложение.</p></article>
 <article class="step"><div class="step-number">05</div><h3 class="step-title">Что с обещаниями?</h3><p>«До 90%» и «до 100%» рыночной цены — маркетинг: реальный дисконт около 28–33%. Цифры «10+ лет», «5000 сделок» и «97% выкупа» — самозаявления, их никто не проверял.</p></article>
 <article class="step"><div class="step-number">06</div><h3 class="step-title">Как пройдёт сделка?</h3><p>Обычно так: заявка → фото в мессенджер → предварительная цена → выезд или встреча → осмотр → расчёт наличными или переводом на карту. Уточните, будет ли договор и кто приедет.</p></article>
 </div>
@@ -343,6 +351,31 @@ def shared_blocks(depth=0):
 </div>
 </section>
 
+<section class="section" id="method-link">
+<div class="container">
+<div class="section-top" style="margin-bottom:0">
+<div><span class="eyebrow">Методика</span><h2 class="section-title">Как составлен<br>рейтинг</h2></div>
+<div><p class="section-copy" style="margin-bottom:20px">Что проверялось, какие факторы влияют на цену выкупа и как отбирались компании — на отдельной странице.</p><a class="btn btn-primary" href="{p}metodika.html">Читать методику <span class="arrow">→</span></a></div>
+</div>
+</div>
+</section>
+</div>
+"""
+
+
+def methodology_page():
+    clusters = "".join(
+        f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
+    return head(f"Методика составления рейтинга скупок алкоголя — {SITE}",
+                "Как составлен рейтинг скупок алкоголя в Москве: источники данных, что проверялось, факторы оценки бутылки, ограничения и группы сайтов одного оператора.") + header() + f"""
+<main id="top">
+<section class="topic-hero">
+<div class="container">
+<span class="eyebrow">Методика</span>
+<h1 class="page-title">Методика составления рейтинга</h1>
+<p class="lead">Откуда берутся данные, что проверялось, какие факторы влияют на цену выкупа и где у рейтинга есть ограничения.</p>
+</div>
+</section>
 <section class="section" id="method">
 <div class="container">
 <div class="section-top">
@@ -371,8 +404,43 @@ def shared_blocks(depth=0):
 </div>
 </div>
 </section>
+{summary_section()}
+</main>
+""" + footer()
+
+
+def about_page():
+    return head(f"О рейтинге скупок алкоголя — {SITE}",
+                "О проекте: независимый рейтинг скупок элитного и коллекционного алкоголя в Москве. Сайт не оказывает и не продаёт услуги, информация носит справочный характер.") + header() + f"""
+<main id="top">
+<section class="topic-hero">
+<div class="container">
+<span class="eyebrow">О рейтинге</span>
+<h1 class="page-title">О рейтинге скупок алкоголя</h1>
+<p class="lead">Независимый рейтинг компаний, которые покупают элитный и коллекционный алкоголь в Москве.</p>
 </div>
-"""
+</section>
+<section class="section">
+<div class="container narrow">
+<div class="prose">
+<p><strong>Что это за сайт.</strong> Мы сравниваем компании, которые скупают коньяк, виски, вино, шампанское и другой коллекционный алкоголь: скорость оценки по фото, публичные цены, условия сделки, плюсы и минусы. Цель — чтобы продавец мог заранее понять, к кому обращаться и чего ожидать.</p>
+<p><strong>Мы не оказываем и не продаём услуги.</strong> Сайт не покупает алкоголь, не принимает бутылки и не участвует в сделках. Вы договариваетесь с выбранной компанией напрямую.</p>
+<p><strong>Независимость.</strong> Рейтинг составлен по открытым данным из разных источников. Компании для сравнения отобраны редакцией сайта.</p>
+<p><strong>Откуда данные.</strong> Публичные сайты компаний и, где сайт закрыт для автоматического доступа, фрагменты поисковой выдачи. Показатели вроде «5000 сделок» или «97% выкупа» — заявления самих компаний, мы их не проверяли. Подробности — в <a class="text-link" href="metodika.html">методике</a>.</p>
+<p><strong>Ограничения.</strong> Вся информация носит исключительно информационный характер и может быть устаревшей. Цены и сроки — заявления компаний, а не оферта. Точную информацию уточняйте на сайтах компаний.</p>
+<h2 class="sub">Как пользоваться рейтингом</h2>
+<ol class="steps-list">
+<li>Посмотрите <a class="text-link" href="./#ranking">список компаний</a> и прочитайте обзоры: плюсы, минусы, вердикт.</li>
+<li>Сравните условия в <a class="text-link" href="./#compare">таблице</a> и <a class="text-link" href="prices.html">цены выкупа</a>.</li>
+<li>Прикиньте сумму в <a class="text-link" href="./#calc">калькуляторе</a>.</li>
+<li>Запросите предложения у двух-трёх компаний из разных групп (часть сайтов, вероятно, принадлежит одному оператору) и попросите зафиксировать цену в переписке.</li>
+</ol>
+<p class="note">Продажа алкоголя лицам младше 18 лет запрещена. Чрезмерное употребление алкоголя вредит вашему здоровью.</p>
+</div>
+</div>
+</section>
+</main>
+""" + footer()
 
 
 def index_page():
@@ -406,7 +474,7 @@ def index_page():
 <ol class="top-list">
 {"".join(f'<li><a href="c/{c["slug"]}.html"><span class="tn">{e(c["name"])}</span><span class="tm">{e(c["meta"]["speed"])}</span></a></li>' for c in CARDS)}
 </ol>
-<a href="#method" class="top-how">Как составлен список?</a>
+<a href="metodika.html" class="top-how">Как составлен список?</a>
 </aside>
 </div>
 </div>
@@ -416,7 +484,7 @@ def index_page():
 <div class="container">
 <div class="section-top">
 <div><span class="eyebrow">Рейтинг</span><h2 class="section-title">Скупки алкоголя<br>в Москве</h2></div>
-<p class="section-copy">Сравнение по скорости оценки, прозрачности цен и условиям сделки. Как составлен список — в разделе «Методика».</p>
+<p class="section-copy">Сравнение по скорости оценки, прозрачности цен и условиям сделки. Как составлен список — в <a class="text-link" href="metodika.html">методике</a>.</p>
 </div>
 <div class="filters" role="group" aria-label="Фильтры">
 <button class="chip active" data-filter="all">Все 20</button>
@@ -431,7 +499,6 @@ def index_page():
 </section>
 
 {compare_section([(c, c['meta']) for c in CARDS])}
-{summary_section()}
 
 {shared_blocks()}
 
@@ -1060,7 +1127,7 @@ def topic_page(tp):
 <div class="container">
 <div class="section-top">
 <div><span class="eyebrow">Рейтинг</span><h2 class="section-title">{e(tp['nav'] if tp['key']=='champagne' else 'Скупки элитного алкоголя')}<br>в Москве</h2></div>
-<p class="section-copy">{'Сравнение по открытым ценам на шампанское, скорости оценки и условиям сделки. Как составлен список — в разделе «Методика».' if tp['key']=='champagne' else 'Сравнение скупок дорогих и редких бутылок по скорости оценки, ценам и условиям сделки. Как составлен список — в разделе «Методика».'}</p>
+<p class="section-copy">{'Сравнение по открытым ценам на шампанское, скорости оценки и условиям сделки. Как составлен список — в <a class="text-link" href="metodika.html">методике</a>.' if tp['key']=='champagne' else 'Сравнение скупок дорогих и редких бутылок по скорости оценки, ценам и условиям сделки. Как составлен список — в <a class="text-link" href="metodika.html">методике</a>.'}</p>
 </div>
 <div class="company-list" id="rankingTable">
 {cards_html}
@@ -1080,6 +1147,8 @@ def topic_page(tp):
 def main():
     (ROOT / "index.html").write_text(index_page(), encoding="utf-8")
     (ROOT / "prices.html").write_text(prices_page(), encoding="utf-8")
+    (ROOT / "metodika.html").write_text(methodology_page(), encoding="utf-8")
+    (ROOT / "o-reitinge.html").write_text(about_page(), encoding="utf-8")
     for tp in TOPICS:
         (ROOT / tp["file"]).write_text(topic_page(tp), encoding="utf-8")
     (ROOT / "c").mkdir(exist_ok=True)
