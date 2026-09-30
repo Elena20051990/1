@@ -224,8 +224,6 @@ def footer(depth=0):
 
 def badges(c):
     out = []
-    if c["own"]:
-        out.append('<span class="pill pill-own">Проект автора сайта</span>')
     if c["cluster"]:
         out.append('<span class="pill pill-warn">Возможно, один оператор</span>')
     return out
@@ -359,8 +357,8 @@ def shared_blocks(depth=0):
 </div>
 <div class="prose" id="disclosure">
 <p><strong>Откуда берутся цены.</strong> Ориентир — мировые аукционные цены и цены импортёров, а не розница магазина. Поэтому выкуп стоит дешевле, чем та же бутылка в магазине. Цены на сайтах скупок — заявленные ориентиры, а не оферта.</p>
-<p><strong>Как составлен рейтинг.</strong> Изучены главные страницы сайтов и, где удалось, страницы категорий. Если сайт закрыт для автоматического доступа, использованы фрагменты поисковой выдачи (это отмечено в карточке). Данные собраны 30 сентября 2026 г. «Не публикует» значит: цен нет на проверенных страницах. Места 3–20 расставлены по прозрачности цен и полноте данных. Числовые рейтинги не выставлялись: независимого источника нет, оценки на Яндекс Картах и 2ГИС не собирались.</p>
-<p><strong>Раскрытие интересов.</strong> Места 1 и 2 занимают Room Alco и Diamant Alko — проекты владельца этого сайта, места закреплены заранее.</p>
+<p><strong>Как составлен рейтинг.</strong> Изучены главные страницы сайтов и, где удалось, страницы категорий. Если сайт закрыт для автоматического доступа, использованы фрагменты поисковой выдачи (это отмечено в карточке). Данные собраны 30 сентября 2026 г. «Не публикует» значит: цен нет на проверенных страницах. Порядок в списке: сначала Room Alco и Diamant Alko, далее компании по прозрачности цен и полноте данных. Список не является оценкой качества услуг. Числовые рейтинги не выставлялись: независимого источника нет, оценки на Яндекс Картах и 2ГИС не собирались.</p>
+<p><strong>Раскрытие интересов.</strong> Room Alco и Diamant Alko — проекты владельца этого сайта.</p>
 <p><strong>Не проверено.</strong> Skupka-Star, Vine-Co (vine-co.ru), VinomerPro, Skupix, СпецВыкуп, Collectors Community, «VIP Выкуп», Vikup-Vina, e-skupka.ru, Alko-vikup, «Скупка PRO»; отзывы на Яндекс Картах и 2ГИС; цены на подстраницах категорий.</p>
 <h3 class="sub">Возможно, один оператор</h3>
 <p>По шаблонам, текстам и контактам видны группы сайтов, которые, вероятно, принадлежат одному оператору. Это признаки, а не доказательство.</p>
@@ -419,7 +417,7 @@ def index_page():
 <div class="container">
 <div class="section-top">
 <div><span class="eyebrow">Рейтинг</span><h2 class="section-title">Скупки алкоголя<br>в Москве</h2></div>
-<p class="section-copy">Места 1–2 занимают проекты автора сайта, места 3–20 расставлены по прозрачности цен и полноте данных. Подробности — в разделе «Методика».</p>
+<p class="section-copy">Сравнение по скорости оценки, прозрачности цен и условиям сделки. Как составлен список — в разделе «Методика».</p>
 </div>
 <div class="filters" role="group" aria-label="Фильтры">
 <button class="chip active" data-filter="all">Все 20</button>
@@ -427,7 +425,7 @@ def index_page():
 <button class="chip" data-filter="fast">Оценка до 5 минут</button>
 </div>
 <div class="ranking-table" id="rankingTable">
-<div class="ranking-header"><span>Место</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
+<div class="ranking-header"><span>№</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
 {"".join(row(c) for c in CARDS)}
 </div>
 <p class="note">Сроки оценки и режимы работы — заявления компаний. Слова «не публикует» означают, что цен нет на проверенных страницах сайта.</p>
@@ -638,7 +636,7 @@ def company_page(c, i):
     if c["cluster"]:
         mates = [d for n, m in CLUSTERS if c["domain"] in m for d in m if d != c["domain"]]
         warn = f'<p class="callout">Возможно, один оператор: {e(c["cluster"])} (сайты: {", ".join(e(d) for d in mates)}). Это признаки по шаблонам и контактам, а не доказательство.</p>'
-    own = ('<p class="callout">Проект владельца сайта. Место в рейтинге закреплено заранее.</p>'
+    own = ('<p class="callout">Проект владельца сайта.</p>'
            if c["own"] else "")
     rel = "sponsored noopener" if c["own"] else "nofollow noopener"
     nav = ""
@@ -651,13 +649,13 @@ def company_page(c, i):
 <main class="page">
 <div class="container narrow">
 <nav class="crumbs"><a href="../">Рейтинг</a> / {e(c['name'])}</nav>
-<span class="eyebrow">Место {c['rank']} из 20</span>
+<span class="eyebrow">Скупка алкоголя</span>
 <h1 class="page-title">{e(c['name'])}</h1>
 <p class="lead">Скупка алкоголя: {e(c['meta']['nom'][0].lower() + c['meta']['nom'][1:])}.</p>
 {note}{own}{warn}
 {cover_figure(c)}
 <div class="badges">
-<div class="badge"><span>Место в рейтинге</span><strong>{c['rank']} из 20</strong></div>
+<div class="badge"><span>График работы</span><strong>{e(mode_of(c))}</strong></div>
 <div class="badge"><span>Оценка по фото</span><strong>{e(c['meta']['speed'])}</strong></div>
 <div class="badge"><span>Цены на сайте</span><strong>{e(c['meta']['price'])}</strong></div>
 </div>
@@ -856,13 +854,13 @@ def topic_page(tp):
 <div class="container">
 <div class="section-top">
 <div><span class="eyebrow">Рейтинг</span><h2 class="section-title">{e(tp['nav'] if tp['key']=='champagne' else 'Скупки элитного алкоголя')}<br>в Москве</h2></div>
-<p class="section-copy">{'Места 1–2 занимают проекты автора сайта. Далее — компании, у которых есть открытые цены на шампанское, затем остальные в порядке общего рейтинга.' if tp['key']=='champagne' else 'Места 1–2 занимают проекты автора сайта. Далее — компании, профильные для дорогих и редких бутылок, в конце — те, кто заявляет и бюджетные позиции.'}</p>
+<p class="section-copy">{'Сравнение по открытым ценам на шампанское, скорости оценки и условиям сделки. Как составлен список — в разделе «Методика».' if tp['key']=='champagne' else 'Сравнение скупок дорогих и редких бутылок по скорости оценки, ценам и условиям сделки. Как составлен список — в разделе «Методика».'}</p>
 </div>
 <div class="ranking-table" id="rankingTable">
-<div class="ranking-header"><span>Место</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
+<div class="ranking-header"><span>№</span><span>Компания</span><span>Номинация</span><span>Оценка по фото</span><span>Цены</span><span>Особенности</span><span></span></div>
 {rows_html}
 </div>
-<p class="note">Сроки оценки и режимы работы — заявления компаний. «Не публикует» значит, что цен нет на проверенных страницах сайта. Порядок мест 3–20 на этой странице составлен по профильности для темы и полноте данных, а не по качеству услуг.</p>
+<p class="note">Сроки оценки и режимы работы — заявления компаний. «Не публикует» значит, что цен нет на проверенных страницах сайта. Порядок компаний на этой странице составлен по профильности для темы и полноте данных, а не по качеству услуг; подробнее — в методике.</p>
 </div>
 </section>
 
