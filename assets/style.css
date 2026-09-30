@@ -286,3 +286,7 @@ dialog.review .cc-actions{margin-top:14px;justify-content:flex-end}
 .header{position:sticky}
 }
 @media(max-width:850px){.header-cta{display:none}}
+.goals{margin:0 0 22px;padding:0;list-style:none;display:grid;gap:12px}
+.goals li{position:relative;padding:16px 20px 16px 48px;border:1px solid var(--line);border-radius:14px;background:#fff;color:var(--muted);line-height:1.65}
+.goals li::before{content:"";position:absolute;left:20px;top:24px;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.goals strong{color:var(--burgundy)}
