@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /send.php
+
+Host: https://alkoskup.ru
+Sitemap: https://alkoskup.ru/sitemap.xml
