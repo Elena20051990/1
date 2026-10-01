@@ -24,6 +24,8 @@ OPERATOR = dict(                      # оператор персональны�
 CLAIM_DAYS = 10                       # срок рассмотрения обращений организаций, рабочих дней (подтвердите, что успеваете)
 REVIEW_ENDPOINT = ""                  # куда отправлять отзывы читателей (JSON, POST); пусто — форма сообщает, что не подключена
 CLAIM_ENDPOINT = ""                   # куда отправлять обращения организаций (JSON, POST)
+GOOGLE_VERIFY = ""                    # содержимое meta google-site-verification (Search Console)
+YANDEX_VERIFY = ""                    # содержимое meta yandex-verification (Яндекс Вебмастер)
 BUILD_DATE = "2026-10-01"             # дата для sitemap (lastmod)
 POLICY_DATE = "1 октября 2026 г."
 # --------------------------------------------------------------------------------------------------
@@ -189,6 +191,28 @@ def breadcrumbs(*items):
         {"@type": "ListItem", "position": i, "name": n, "item": f"{SITE_URL}/{pth}"} for i, (n, pth) in enumerate(items, 1)]}
 
 
+def key_facts(rows, topic=None):
+    """Блок «Коротко»: факты из данных в виде короткого списка (удобно людям и ИИ-краулерам)."""
+    priced = [c["name"] for c in CARDS if c["meta"]["price"] not in ("Не публикует", "Не проверено")]
+    top = max(CARDS, key=lambda c: scores(c)[1])
+    fast = [c for c in CARDS if SCORE_INPUT[c["domain"]]["speed_min"] is not None]
+    quick = min(fast, key=lambda c: SCORE_INPUT[c["domain"]]["speed_min"])
+    slow = max(fast, key=lambda c: SCORE_INPUT[c["domain"]]["speed_min"])
+    items = [f"В рейтинге {len(CARDS)} компаний; открытые цены публикуют {len(priced)}: {', '.join(priced)}."]
+    if topic == "champagne":
+        n = [x for r in CHAMP_ROWS for col in (1, 3) for x in _nums(r[col])]
+        items.append(f"Цены на шампанское публикуют только 700ml и Red Decanter: от {fmt_rub(min(n))} до {fmt_rub(max(n))} ₽ за бутылку по их прайсам (цены «от» и приблизительные).")
+    elif topic == "elite":
+        items.append("Для дорогих и редких бутылок профильны Red Decanter (до 5 000 000 ₽ в прайсе), 700ml (до 200 000 ₽, Petrus), SKUPKA-ALKOGOL (сегменты до «свыше 100 000 ₽»).")
+    items.append("Типичный уровень выкупа — 67–72% рыночной цены бутылки по опубликованным таблицам скупок; обещания «до 90%» и «до 100%» — рекламные заявления.")
+    items.append(f"Заявленный срок оценки по фото: самый быстрый — {quick['meta']['speed'].lower()} ({quick['name']}), самый медленный — {slow['meta']['speed'].lower()} ({slow['name']}).")
+    items.append(f"Высшая оценка редакции — {scores(top)[1]:g} из 5 ({top['name']}); оценка считается по трём параметрам, правила — в методике.")
+    items.append("Часть сайтов, вероятно, принадлежит одному оператору: 700ml, Alko Lombard и oldcognac; Red Decanter и SKUPKA-ALKOGOL; Cupaj Club и Alko Prikup.")
+    li = "".join(f"<li>{e(x)}</li>" for x in items)
+    return f"""<section class="section keyfacts" id="summary-short"><div class="container narrow"><h2 class="sub" style="margin-top:0">Коротко</h2><ul class="goals">{li}</ul></div></section>
+"""
+
+
 def itemlist(cards):
     return {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [
         {"@type": "ListItem", "position": i, "name": c["name"], "url": f"{SITE_URL}/c/{c['slug']}.html"} for i, c in enumerate(cards, 1)]}
@@ -219,6 +243,15 @@ def head(title, desc, depth=0, path="", ld=None):
     p = "../" * depth
     url = f"{SITE_URL}/{path}"
     site_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": SITE, "url": SITE_URL + "/", "inLanguage": "ru"}
+    org = {"@context": "https://schema.org", "@type": "Organization", "name": OPERATOR.get("name") or SITE, "url": SITE_URL + "/", "logo": f"{SITE_URL}/assets/og.png"}
+    if OPERATOR.get("email"):
+        org["email"] = OPERATOR["email"]
+        org["contactPoint"] = {"@type": "ContactPoint", "contactType": "customer support", "email": OPERATOR["email"], "availableLanguage": "ru"}
+    if OPERATOR.get("address"):
+        org["address"] = OPERATOR["address"]
+    page_ld = {"@context": "https://schema.org", "@type": "WebPage", "name": title, "url": url, "description": desc, "inLanguage": "ru",
+               "dateModified": BUILD_DATE, "isPartOf": {"@type": "WebSite", "name": SITE, "url": SITE_URL + "/"}, "publisher": {"@type": "Organization", "name": OPERATOR.get("name") or SITE}}
+    verify = (f'<meta name="google-site-verification" content="{e(GOOGLE_VERIFY)}">\n' if GOOGLE_VERIFY else "") + (f'<meta name="yandex-verification" content="{e(YANDEX_VERIFY)}">\n' if YANDEX_VERIFY else "")
     return f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -229,6 +262,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#431f2a">
 <link rel="canonical" href="{url}">
+{verify}<link rel="alternate" type="application/json" href="{SITE_URL}/data/companies.json" title="Данные рейтинга (JSON)">
 <link rel="icon" href="{p}assets/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
@@ -247,7 +281,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{p}assets/style.css">
-{jsonld(site_ld, *(ld or []))}
+{jsonld(site_ld, org, page_ld, *(ld or []))}
 </head>
 <body>
 """
@@ -296,7 +330,7 @@ def footer(depth=0):
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
 <a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Элитное шампанское</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
-<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div></div>
+<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}kontakty.html">Контакты</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div></div>
 </div>
 <p class="legal">Независимый рейтинг: составлен по открытым данным из разных источников, компании отобраны редакцией сайта. Сайт не оказывает и не продаёт услуги. Вся информация носит исключительно информационный характер и может быть устаревшей. Точную информацию уточняйте на сайтах компаний. Цены и сроки — заявления компаний, не оферта. Продажа алкоголя лицам младше 18 лет запрещена.</p>
 <div class="footer-bottom"><p>© 2026 {SITE}. Информация носит справочный характер.</p><p>Данные актуальны на {UPDATED}</p></div>
@@ -602,6 +636,7 @@ def index_page():
 </div>
 </section>
 
+{key_facts(CARDS)}
 <section class="section ranking-section" id="ranking">
 <div class="container">
 <div class="section-top">
@@ -1086,6 +1121,7 @@ def score_table():
 <article><h3>Скорость и удобство</h3><p>База по заявленному сроку оценки по фото: до 5 минут — 4,5; до 15 — 4; до 30 — 3; до 2 часов — 2,5; дольше — 2; срок не указан — 2,5. Плюс 0,5 за работу 14 часов в сутки и больше, минус 0,5 за 9 часов и меньше и ещё минус 0,5, если только по будням.</p></article>
 <article><h3>Открытость компании</h3><p>По баллу за каждый признак: указан адрес; указан режим работы; сайт самостоятельный (не похож на сайт другого оператора); нет противоречий и устаревших данных; есть публичные подтверждения (кейсы, датированные отзывы). Минимум — 1.</p></article>
 </div>
+<p class="note">Данные рейтинга в машиночитаемом виде: <a class="text-link" href="data/companies.json">companies.json</a> и <a class="text-link" href="data/companies.csv">companies.csv</a>.</p>
 <p class="note">Итоговая оценка — среднее трёх параметров, округлённое до десятых. Публичных подтверждений в открытых данных не нашлось ни у кого, поэтому пятёрки по открытости нет у всех. Сроки и режимы — заявления компаний. Оценка отражает данные на дату сбора и может измениться.</p>
 <div class="table-wrap"><table class="data"><thead><tr><th>Компания</th><th>Прозрачность цен</th><th>Скорость и удобство</th><th>Открытость</th><th>Итого</th></tr></thead><tbody>{rows}</tbody></table></div>
 </div>
@@ -1315,7 +1351,10 @@ def topic_cross(cur_key, depth):
     (ROOT / "politika-konfidencialnosti.html").write_text(privacy_page(), encoding="utf-8")
     (ROOT / "politika-cookie.html").write_text(cookie_page(), encoding="utf-8")
     (ROOT / "dlya-kompanii.html").write_text(company_page_for_orgs(), encoding="utf-8")
-    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("politika-konfidencialnosti.html", "0.2"), ("politika-cookie.html", "0.2")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
+    (ROOT / "kontakty.html").write_text(contacts_page(), encoding="utf-8")
+    write_data_files()
+    write_llms_txt()
+    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("kontakty.html", "0.4"), ("politika-konfidencialnosti.html", "0.2"), ("politika-cookie.html", "0.2")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
     write_seo_files(sm)
     for tp in TOPICS:
         if tp["key"] != cur_key:
@@ -1340,6 +1379,7 @@ def topic_page(tp):
 </div>
 </section>
 
+{key_facts(None, tp['key'])}
 <section class="section ranking-section" id="ranking">
 <div class="container">
 <div class="section-top">
@@ -1490,11 +1530,96 @@ def company_page_for_orgs():
                        "dlya-kompanii.html", "Для организаций", "Нашли ошибку в карточке вашей компании? Расскажите, мы проверим и исправим.", body, eyebrow="Обратная связь")
 
 
+def contacts_page():
+    body = f"""
+<p>Сайт «{SITE}» — независимый справочник и не оказывает услуг по скупке алкоголя. Через эту страницу можно связаться с редакцией.</p>
+<h2>Редакция</h2>
+<p>Оператор сайта: {ph('name', 'ФИО или наименование оператора')}<br>ИНН: {ph('inn', 'ИНН')}<br>Адрес для обращений: {ph('address', 'адрес')}<br>E-mail: {ph('email', 'e-mail')}</p>
+<h2>По какому вопросу писать</h2>
+<ul>
+<li><strong>Вы представляете компанию из рейтинга</strong> и нашли ошибку или хотите направить претензию — <a class="text-link" href="dlya-kompanii.html">страница для организаций</a>.</li>
+<li><strong>Вы читатель</strong> и хотите сообщить об ошибке в данных или поделиться опытом сделки — напишите на e-mail редакции.</li>
+<li><strong>Вопросы о персональных данных</strong> (доступ, удаление, отзыв согласия) — на тот же e-mail, см. <a class="text-link" href="politika-konfidencialnosti.html">политику конфиденциальности</a>.</li>
+</ul>
+<p class="note">Мы не покупаем алкоголь и не принимаем бутылки: по вопросам продажи обращайтесь напрямую в выбранную компанию.</p>
+"""
+    return simple_page(f"Контакты — {SITE}", "Как связаться с редакцией рейтинга скупок алкоголя: реквизиты оператора, e-mail и страница для организаций.",
+                       "kontakty.html", "Контакты", "Как связаться с редакцией.", body, eyebrow="Связь")
+
+
+def company_records():
+    out = []
+    for c in CARDS:
+        p, total = scores(c)
+        phone, email, addr, msg = FACTS[c["domain"]]
+        rng, rng_note = price_range(c)
+        r = REVIEWS[c["domain"]]
+        out.append({
+            "name": c["name"], "domain": c["domain"], "site": f"https://{c['domain']}", "page": f"{SITE_URL}/c/{c['slug']}.html",
+            "hours": mode_of(c), "address": None if addr == ND else addr, "phone": phone, "email": email or None, "messengers": msg or None,
+            "speed_claim": c["speed"], "prices_claim": c["prices"], "price_range": rng, "price_range_note": rng_note,
+            "possible_same_operator": c["cluster"],
+            "editorial_score": {"total": total, "price_transparency": p["price"], "speed_convenience": p["speed"], "openness": p["trust"], "scale": "1-5"},
+            "summary": r["lead"], "pros": r["pros"], "cons": r["cons"], "verdict": r["verdict"],
+        })
+    return out
+
+
+def write_data_files():
+    import csv, io, json
+    d = ROOT / "data"
+    d.mkdir(exist_ok=True)
+    recs = company_records()
+    meta = {"title": f"{SITE}: рейтинг скупок элитного алкоголя в Москве", "url": SITE_URL + "/", "data_collected": "2026-09-30",
+            "note": "Заявления компаний, не оферта; информация справочная и может быть устаревшей. Оценка редакции рассчитана по открытым данным (см. методику).",
+            "methodology": f"{SITE_URL}/metodika.html", "companies": recs}
+    (d / "companies.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["name", "site", "page", "hours", "address", "phone", "email", "speed_claim", "price_range", "score_total", "score_price", "score_speed", "score_openness"])
+    for r in recs:
+        sc = r["editorial_score"]
+        w.writerow([r["name"], r["site"], r["page"], r["hours"], r["address"] or "", r["phone"], r["email"] or "", r["speed_claim"], r["price_range"], sc["total"], sc["price_transparency"], sc["speed_convenience"], sc["openness"]])
+    (d / "companies.csv").write_text("\ufeff" + buf.getvalue(), encoding="utf-8")
+
+
+def write_llms_txt():
+    lines = [f"# {SITE} — рейтинг скупок элитного и коллекционного алкоголя в Москве", "",
+             "> Сравнение 20 компаний, которые скупают коньяк, виски, вино, шампанское и другой коллекционный алкоголь: скорость оценки по фото, открытые цены, условия сделки, плюсы и минусы, оценка редакции по трём параметрам. Сайт не оказывает и не продаёт услуги; информация справочная и может быть устаревшей, точные данные — на сайтах компаний. Данные собраны 30.09.2026.", "",
+             "## Основные страницы", "",
+             f"- [Где можно продать алкоголь в Москве]({SITE_URL}/): рейтинг и сравнительная таблица 20 компаний",
+             f"- [{TOPICS[0]['h1'].rstrip('?')}]({SITE_URL}/{TOPICS[0]['file']}): скупки дорогих и редких бутылок",
+             f"- [{TOPICS[1]['h1'].rstrip('?')}]({SITE_URL}/{TOPICS[1]['file']}): цены на шампанское и компании, которые его покупают",
+             f"- [Цены выкупа]({SITE_URL}/prices.html): сводка опубликованных цен по четырём компаниям",
+             f"- [Методика]({SITE_URL}/metodika.html): источники, правила оценки, ограничения",
+             f"- [О рейтинге]({SITE_URL}/o-reitinge.html): миссия и принципы",
+             f"- [Для организаций]({SITE_URL}/dlya-kompanii.html): как исправить данные или направить претензию", "",
+             "## Данные для машинной обработки", "",
+             f"- [companies.json]({SITE_URL}/data/companies.json): все компании, оценки, диапазоны цен, обзоры",
+             f"- [companies.csv]({SITE_URL}/data/companies.csv): то же в табличном виде", "",
+             "## Компании", ""]
+    for c in CARDS:
+        lines.append(f"- [{c['name']}]({SITE_URL}/c/{c['slug']}.html): {REVIEWS[c['domain']]['lead'].rstrip('.')} (оценка редакции {scores(c)[1]:g} из 5)")
+    (ROOT / "llms.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+AI_BOTS = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-SearchBot", "Claude-User", "PerplexityBot", "Perplexity-User",
+           "Google-Extended", "Applebot-Extended", "CCBot", "YandexBot", "YandexAdditional", "Googlebot", "Bingbot"]
+
+
+def postprocess(html):
+    """Семантика таблиц: scope у заголовков."""
+    html = re.sub(r"(<thead>.*?</thead>)", lambda m: m.group(1).replace("<th>", '<th scope="col">'), html, flags=re.S)
+    html = re.sub(r"(<table class=\"facts-table\">.*?</table>)", lambda m: m.group(1).replace("<th>", '<th scope="row">'), html, flags=re.S)
+    return html
+
+
 def write_seo_files(pages):
     urls = "\n".join(
         f"<url><loc>{SITE_URL}/{p}</loc><lastmod>{BUILD_DATE}</lastmod><priority>{pr}</priority></url>" for p, pr in pages)
     (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>\n', encoding="utf-8")
-    (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    bots = "".join(f"User-agent: {b}\nAllow: /\n\n" for b in AI_BOTS)
+    (ROOT / "robots.txt").write_text(f"# Поисковые и ИИ-краулеры допускаются явно; служебные папки закрыты для всех\n{bots}User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
 
 def main():
@@ -1513,3 +1638,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    for f in list(ROOT.glob("*.html")) + list((ROOT / "c").glob("*.html")):
+        f.write_text(postprocess(f.read_text(encoding="utf-8")), encoding="utf-8")
