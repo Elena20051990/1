@@ -13,6 +13,21 @@ ROOT = Path(__file__).resolve().parent.parent
 TXT = (ROOT / "tools" / "niche.txt").read_text(encoding="utf-8")
 LINES = [html.unescape(l).rstrip() for l in TXT.split("\n")]
 
+# ---- Настройки, которые нужно заполнить перед запуском -------------------------------------------
+SITE_URL = "https://valura.example"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
+OPERATOR = dict(                      # оператор персональных данных (подставляется в политики и на страницу «Для компаний»)
+    name="",      # ФИО или название организации/ИП
+    inn="",       # ИНН (и ОГРН/ОГРНИП, если есть)
+    address="",   # адрес для обращений
+    email="",     # e-mail для обращений
+)
+CLAIM_DAYS = 10                       # срок рассмотрения обращений организаций, рабочих дней (подтвердите, что успеваете)
+REVIEW_ENDPOINT = ""                  # куда отправлять отзывы читателей (JSON, POST); пусто — форма сообщает, что не подключена
+CLAIM_ENDPOINT = ""                   # куда отправлять обращения организаций (JSON, POST)
+BUILD_DATE = "2026-10-01"             # дата для sitemap (lastmod)
+POLICY_DATE = "1 октября 2026 г."
+# --------------------------------------------------------------------------------------------------
+
 SITE = "ВАЛЮРА"
 SITE_SUB = "Скупка алкоголя · рейтинг"
 UPDATED = "30 сентября 2026"
@@ -157,8 +172,53 @@ def rub(n):
 
 
 # ---------------------------------------------------------------- шаблоны
-def head(title, desc, depth=0):
+def ph(key, label):
+    """Реквизит оператора или заметная заглушка, пока он не заполнен."""
+    v = OPERATOR.get(key, "")
+    return e(v) if v else f'<span class="ph">[укажите {label}]</span>'
+
+
+def jsonld(*objs):
+    import json
+    return "\n".join('<script type="application/ld+json">' + json.dumps(o, ensure_ascii=False).replace("</", "<\\/") + "</script>" for o in objs if o)
+
+
+def breadcrumbs(*items):
+    """items — [(название, путь)] от главной; путь относительно корня сайта."""
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [
+        {"@type": "ListItem", "position": i, "name": n, "item": f"{SITE_URL}/{pth}"} for i, (n, pth) in enumerate(items, 1)]}
+
+
+def itemlist(cards):
+    return {"@context": "https://schema.org", "@type": "ItemList", "itemListElement": [
+        {"@type": "ListItem", "position": i, "name": c["name"], "url": f"{SITE_URL}/c/{c['slug']}.html"} for i, c in enumerate(cards, 1)]}
+
+
+def faq_ld():
+    return {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [
+        {"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in FAQ]}
+
+
+def review_ld(c):
+    org = {"@type": "Organization", "name": c["name"], "url": f"https://{c['domain']}"}
+    phone, _, addr, _ = FACTS[c["domain"]]
+    if phone:
+        m = re.search(r"(?:\+7|8)\s*\(\d{3}\)\s*[\d\-]+", phone)
+        if m:
+            org["telephone"] = m.group(0)
+    if addr != ND:
+        org["address"] = {"@type": "PostalAddress", "streetAddress": addr}
+    r = REVIEWS[c["domain"]]
+    return {"@context": "https://schema.org", "@type": "Review", "itemReviewed": org,
+            "author": {"@type": "Organization", "name": SITE},
+            "reviewRating": {"@type": "Rating", "ratingValue": scores(c)[1], "bestRating": 5, "worstRating": 1},
+            "name": f"{c['name']}: оценка редакции", "reviewBody": f"{r['lead']} {r['verdict']}", "inLanguage": "ru"}
+
+
+def head(title, desc, depth=0, path="", ld=None):
     p = "../" * depth
+    url = f"{SITE_URL}/{path}"
+    site_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": SITE, "url": SITE_URL + "/", "inLanguage": "ru"}
     return f"""<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -166,10 +226,28 @@ def head(title, desc, depth=0):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="theme-color" content="#431f2a">
+<link rel="canonical" href="{url}">
+<link rel="icon" href="{p}assets/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="{SITE}">
+<meta property="og:title" content="{e(title)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{url}">
+<meta property="og:image" content="{SITE_URL}/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{e(title)}">
+<meta name="twitter:description" content="{e(desc)}">
+<meta name="twitter:image" content="{SITE_URL}/assets/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{p}assets/style.css">
+{jsonld(site_ld, *(ld or []))}
 </head>
 <body>
 """
@@ -218,15 +296,15 @@ def footer(depth=0):
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
 <a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Элитное шампанское</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
-<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a></div></div>
+<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div></div>
 </div>
 <p class="legal">Независимый рейтинг: составлен по открытым данным из разных источников, компании отобраны редакцией сайта. Сайт не оказывает и не продаёт услуги. Вся информация носит исключительно информационный характер и может быть устаревшей. Точную информацию уточняйте на сайтах компаний. Цены и сроки — заявления компаний, не оферта. Продажа алкоголя лицам младше 18 лет запрещена.</p>
 <div class="footer-bottom"><p>© 2026 {SITE}. Информация носит справочный характер.</p><p>Данные актуальны на {UPDATED}</p></div>
 </div>
 </footer>
-{review_dialog()}
+{review_dialog(p)}
 <div class="cookie-bar" id="cookieBar" role="dialog" aria-label="Согласие на использование cookie" hidden>
-<p>Мы используем файлы cookie, чтобы сайт работал корректно и был удобнее. Продолжая пользоваться сайтом, вы соглашаетесь на их использование.</p>
+<p>Мы используем файлы cookie, чтобы сайт работал корректно и был удобнее. Продолжая пользоваться сайтом, вы соглашаетесь на их использование. <a href="{p}politika-cookie.html">Подробнее</a></p>
 <button class="btn btn-primary" type="button" id="cookieOk">Согласен</button>
 </div>
 <script src="{p}assets/site.js"></script>
@@ -273,6 +351,34 @@ def mode_of(c):
         return MODE_FIX[c["domain"]]
     m = re.search(r"Режим[^:]*:\s*(.+?)\.?\s*$", c["contacts"])
     return m[1].strip().rstrip(".") if m else "не указан"
+
+
+FAQ = [
+ [
+  "Что покупают скупки элитного алкоголя?",
+  "Возрастной виски (Macallan, Yamazaki, Balvenie, Highland Park), коньяк (Hennessy XO/Paradis/Richard, Louis XIII, Martell Cordon Bleu), вина (Petrus, Lafite, Margaux, Masseto, Sassicaia), шампанское (Dom Pérignon, Cristal, Krug, Salon), ром и арманьяк, алкоголь СССР с коллекционной ценностью. Упаковка, тубус и декантер часто дают надбавку или покупаются отдельно."
+ ],
+ [
+  "Что не берут?",
+  "Открытые бутылки, повреждённую пробку и капсулу, подделки, массовый сегмент. Исключение — Cupaj Club и Alko Prikup: они заявляют, что рассматривают и бюджетные позиции."
+ ],
+ [
+  "Как формируется цена выкупа?",
+  "Ориентир — мировые аукционные цены и цены импортёров, а не розница магазина. Поэтому предложение ниже магазинной цены. На итог влияют бренд, год и тираж, уровень жидкости, состояние этикетки, капсулы и пробки, наличие коробки, формат бутылки, регион (в Москве платят больше) и объём партии."
+ ],
+ [
+  "Почему цена меняется при встрече?",
+  "Предварительная оценка по фото не учитывает состояние бутылки вживую. Компании, которые гарантируют неизменность цены, оговаривают «если нет новых обстоятельств». Уточняйте условие до выезда."
+ ],
+ [
+  "Как быстро оценивают бутылку?",
+  "Заявленные сроки — от 2 до 15 минут, у Room Alco около 30 минут, у 700ml до 24 часов. Скорость оценки не выделяет ни одного игрока."
+ ],
+ [
+  "Можно ли продать бутылку без коробки или акцизной марки?",
+  "Часто можно: например, 1buyup берёт бутылки без коробки и без акцизной марки, а также алкоголь СССР. Но без коробки цена может быть ниже до 30% (по данным Red Decanter)."
+ ]
+]
 
 
 def shared_blocks(depth=0):
@@ -367,7 +473,8 @@ def methodology_page():
     clusters = "".join(
         f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
     return head(f"Методика составления рейтинга скупок алкоголя — {SITE}",
-                "Как составлен рейтинг скупок алкоголя в Москве: источники данных, что проверялось, факторы оценки бутылки, ограничения и группы сайтов одного оператора.") + header() + f"""
+                "Как составлен рейтинг скупок алкоголя в Москве: источники данных, что проверялось, факторы оценки бутылки, ограничения и группы сайтов одного оператора.",
+                path="metodika.html", ld=[breadcrumbs(("Главная", ""), ("Методика", "metodika.html"))]) + header() + f"""
 <main id="top">
 <section class="topic-hero">
 <div class="container">
@@ -412,7 +519,8 @@ def methodology_page():
 
 def about_page():
     return head(f"О рейтинге скупок алкоголя — {SITE}",
-                "О проекте: независимый рейтинг скупок элитного и коллекционного алкоголя в Москве. Сайт не оказывает и не продаёт услуги, информация носит справочный характер.") + header() + f"""
+                "О проекте: независимый рейтинг скупок элитного и коллекционного алкоголя в Москве. Сайт не оказывает и не продаёт услуги, информация носит справочный характер.",
+                path="o-reitinge.html", ld=[{"@context": "https://schema.org", "@type": "AboutPage", "name": f"О рейтинге — {SITE}", "url": f"{SITE_URL}/o-reitinge.html", "inLanguage": "ru"}, breadcrumbs(("Главная", ""), ("О рейтинге", "o-reitinge.html"))]) + header() + f"""
 <main id="top">
 <section class="topic-hero">
 <div class="container">
@@ -468,7 +576,8 @@ def index_page():
         f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
     priced = sum(1 for c in CARDS if c["meta"]["price"] not in ("Не публикует", "Не проверено"))
     body = head(f"Где можно продать алкоголь в Москве? Рейтинг скупок — {SITE}",
-                "Где продать коньяк, виски, вино и шампанское в Москве выгодно и быстро: рейтинг 20 скупок элитного и коллекционного алкоголя, цены выкупа, скорость оценки по фото, условия выезда.") + header() + f"""
+                "Где продать коньяк, виски, вино и шампанское в Москве выгодно и быстро: рейтинг 20 скупок элитного и коллекционного алкоголя, цены выкупа, скорость оценки по фото, условия выезда.",
+                path="", ld=[itemlist(CARDS), faq_ld()]) + header() + f"""
 <main id="top">
 <section class="hero">
 <div class="container hero-grid">
@@ -522,12 +631,7 @@ def index_page():
 <p class="section-copy">Коротко о том, что покупают, что не берут и от чего зависит цена.</p>
 </div>
 <div class="faq">
-<details><summary>Что покупают скупки элитного алкоголя?</summary><p>Возрастной виски (Macallan, Yamazaki, Balvenie, Highland Park), коньяк (Hennessy XO/Paradis/Richard, Louis XIII, Martell Cordon Bleu), вина (Petrus, Lafite, Margaux, Masseto, Sassicaia), шампанское (Dom Pérignon, Cristal, Krug, Salon), ром и арманьяк, алкоголь СССР с коллекционной ценностью. Упаковка, тубус и декантер часто дают надбавку или покупаются отдельно.</p></details>
-<details><summary>Что не берут?</summary><p>Открытые бутылки, повреждённую пробку и капсулу, подделки, массовый сегмент. Исключение — Cupaj Club и Alko Prikup: они заявляют, что рассматривают и бюджетные позиции.</p></details>
-<details><summary>Как формируется цена выкупа?</summary><p>Ориентир — мировые аукционные цены и цены импортёров, а не розница магазина. Поэтому предложение ниже магазинной цены. На итог влияют бренд, год и тираж, уровень жидкости, состояние этикетки, капсулы и пробки, наличие коробки, формат бутылки, регион (в Москве платят больше) и объём партии.</p></details>
-<details><summary>Почему цена меняется при встрече?</summary><p>Предварительная оценка по фото не учитывает состояние бутылки вживую. Компании, которые гарантируют неизменность цены, оговаривают «если нет новых обстоятельств». Уточняйте условие до выезда.</p></details>
-<details><summary>Как быстро оценивают бутылку?</summary><p>Заявленные сроки — от 2 до 15 минут, у Room Alco около 30 минут, у 700ml до 24 часов. Скорость оценки не выделяет ни одного игрока.</p></details>
-<details><summary>Можно ли продать бутылку без коробки или акцизной марки?</summary><p>Часто можно: например, 1buyup берёт бутылки без коробки и без акцизной марки, а также алкоголь СССР. Но без коробки цена может быть ниже до 30% (по данным Red Decanter).</p></details>
+{"".join(f"<details><summary>{e(q)}</summary><p>{e(an)}</p></details>" for q, an in FAQ)}
 </div>
 </div>
 </section>
@@ -679,7 +783,6 @@ def facts_table(c):
 
 
 # ---------------------------------------------------------------- карточки рейтинга
-REVIEW_ENDPOINT = ""  # адрес, куда форма «Оставить отзыв» отправит JSON; пока не подключён
 
 
 def lf(s):
@@ -883,7 +986,7 @@ def compare_section(rows, title="Сравнение<br>условий", copy="Р
 """
 
 
-def review_dialog():
+def review_dialog(p=""):
     return f"""<dialog id="reviewDialog" class="review">
 <form method="dialog" id="reviewForm" data-endpoint="{e(REVIEW_ENDPOINT)}">
 <h3 class="sub" style="margin:0 0 6px">Оставить отзыв</h3>
@@ -891,6 +994,7 @@ def review_dialog():
 <label class="lbl">Ваше имя<input class="field" name="name" maxlength="80" autocomplete="name"></label>
 <label class="lbl">Оценка<select class="field" name="rating" required><option value="">Выберите</option><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></label>
 <label class="lbl">Отзыв<textarea class="field" name="text" rows="5" maxlength="2000" required></textarea></label>
+<p class="muted">Отправляя отзыв, вы соглашаетесь с <a class="text-link" href="{p}politika-konfidencialnosti.html">политикой конфиденциальности</a>.</p>
 <p class="muted" id="reviewMsg" role="status"></p>
 <div class="cc-actions"><button class="btn btn-outline" type="button" id="reviewCancel">Закрыть</button><button class="btn btn-primary" type="submit">Отправить</button></div>
 </form>
@@ -1022,8 +1126,9 @@ def company_page(c, i):
         nav += f'<a href="{prev_c["slug"]}.html" class="btn btn-outline">← {e(prev_c["name"])}</a>'
     if next_c:
         nav += f'<a href="{next_c["slug"]}.html" class="btn btn-outline">{e(next_c["name"])} →</a>'
-    return head(f"{c['name']} — скупка алкоголя: отзывы, цены, условия | {SITE}",
-                f"{c['name']} ({c['domain']}): режим работы, скорость оценки, цены выкупа, плюсы и минусы. Данные на {UPDATED}.", 1) + header(1) + f"""
+    return head(f"{c['name']} — скупка алкоголя: обзор, цены, условия | {SITE}",
+                f"{c['name']} ({c['domain']}): режим работы, скорость оценки, цены выкупа, плюсы и минусы. Оценка редакции {scores(c)[1]:g} из 5.", 1,
+                path=f"c/{c['slug']}.html", ld=[breadcrumbs(("Главная", ""), (c["name"], f"c/{c['slug']}.html")), review_ld(c)]) + header(1) + f"""
 <main class="page">
 <div class="container narrow">
 <nav class="crumbs"><a href="../">Рейтинг</a> / {e(c['name'])}</nav>
@@ -1059,7 +1164,8 @@ def prices_page():
     rum = "".join(f"<tr><td>{e(a)}</td><td>{e(b)} ₽</td></tr>" for a, b in RUM)
     seg = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td></tr>" for a, b in SEG)
     return head(f"Цены выкупа элитного алкоголя в Москве — {SITE}",
-                "Сводка цен выкупа виски, коньяка, шампанского и вина по данным 700ml, 1buyup, Red Decanter и SKUPKA-ALKOGOL.") + header() + f"""
+                "Сводка цен выкупа виски, коньяка, шампанского и вина по данным 700ml, 1buyup, Red Decanter и SKUPKA-ALKOGOL.",
+                path="prices.html", ld=[breadcrumbs(("Главная", ""), ("Цены выкупа", "prices.html"))]) + header() + f"""
 <main class="page">
 <div class="container">
 <span class="eyebrow">Сводка по источникам</span>
@@ -1206,6 +1312,11 @@ def topic_cross(cur_key, depth):
     p = "../" * depth
     home = p or "./"
     items = [(home + "#ranking", "Где можно продать алкоголь в Москве", "Общий рейтинг 20 скупок")]
+    (ROOT / "politika-konfidencialnosti.html").write_text(privacy_page(), encoding="utf-8")
+    (ROOT / "politika-cookie.html").write_text(cookie_page(), encoding="utf-8")
+    (ROOT / "dlya-kompanii.html").write_text(company_page_for_orgs(), encoding="utf-8")
+    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("politika-konfidencialnosti.html", "0.2"), ("politika-cookie.html", "0.2")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
+    write_seo_files(sm)
     for tp in TOPICS:
         if tp["key"] != cur_key:
             items.append((p + tp["file"], tp["h1"].rstrip("?"), "Отдельный рейтинг"))
@@ -1218,7 +1329,7 @@ def topic_cross(cur_key, depth):
 def topic_page(tp):
     rows = ranked_cards(tp["key"])
     cards_html = "".join(company_card(c, m, topic=tp["key"]) for c, m, i in rows)
-    return head(tp["title"], tp["desc"]) + header() + f"""
+    return head(tp["title"], tp["desc"], path=tp["file"], ld=[breadcrumbs(("Главная", ""), (tp["h1"].rstrip("?"), tp["file"])), itemlist([c for c, m, i in rows])]) + header() + f"""
 <main id="top">
 <section class="topic-hero">
 <div class="container">
@@ -1248,6 +1359,142 @@ def topic_page(tp):
 {topic_cross(tp['key'], 0)}
 </main>
 """ + footer()
+
+
+# ---------------------------------------------------------------- юридические страницы и страница для организаций
+def simple_page(title, desc, path, h1, lead, body, eyebrow="Документ"):
+    return head(title, desc, path=path, ld=[breadcrumbs(("Главная", ""), (h1, path))]) + header() + f"""
+<main id="top">
+<section class="topic-hero">
+<div class="container">
+<span class="eyebrow">{e(eyebrow)}</span>
+<h1 class="page-title">{e(h1)}</h1>
+<p class="lead">{lead}</p>
+</div>
+</section>
+<section class="section">
+<div class="container narrow">
+<div class="prose legal-doc">
+{body}
+</div>
+</div>
+</section>
+</main>
+""" + footer()
+
+
+def privacy_page():
+    op = f"{ph('name', 'ФИО или наименование оператора')}, ИНН {ph('inn', 'ИНН')}"
+    body = f"""
+<p class="note-draft">Редакция от {POLICY_DATE}. Текст подготовлен как рабочий шаблон: подставьте реквизиты оператора и согласуйте текст с юристом.</p>
+<h2>1. Общие положения</h2>
+<p>Настоящая политика описывает, как сайт «{SITE}» ({SITE_URL}) обрабатывает персональные данные посетителей. Оператор персональных данных — {op}, адрес для обращений: {ph('address', 'адрес')}, e-mail: {ph('email', 'e-mail')}. Политика составлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
+<p>Сайт — информационный справочник со сравнением компаний, которые скупают алкоголь. Сайт не оказывает и не продаёт услуги и не предназначен для лиц младше 18 лет.</p>
+<h2>2. Какие данные мы обрабатываем</h2>
+<ul>
+<li><strong>Технические данные:</strong> IP-адрес, тип браузера и устройства, адреса посещённых страниц, дата и время запроса. Они попадают в журналы сервера хостинга автоматически.</li>
+<li><strong>Файлы cookie:</strong> подробности — в <a class="text-link" href="politika-cookie.html">политике cookie</a>.</li>
+<li><strong>Данные из формы отзыва:</strong> имя (необязательно), оценка и текст отзыва.</li>
+<li><strong>Данные из формы для организаций:</strong> название организации, сайт, имя контактного лица, e-mail, текст обращения, ссылки на подтверждающие материалы.</li>
+<li><strong>Письма на e-mail</strong>: данные, которые вы указали в письме.</li>
+</ul>
+<p>Мы просим не указывать в отзывах и обращениях лишнего: номера документов, банковские данные, адреса и телефоны третьих лиц.</p>
+<h2>3. Цели обработки</h2>
+<ul>
+<li>публикация отзывов читателей после проверки;</li>
+<li>рассмотрение обращений организаций об исправлении данных и претензий;</li>
+<li>обеспечение работы и безопасности сайта;</li>
+<li>ответы на ваши письма и запросы.</li>
+</ul>
+<h2>4. Основание обработки</h2>
+<p>Обработка осуществляется с вашего согласия, которое вы даёте, отправляя форму и отмечая согласие, а также в случаях, предусмотренных законом. Согласие можно отозвать, написав на {ph('email', 'e-mail')}.</p>
+<h2>5. Передача данных третьим лицам</h2>
+<p>Мы не продаём персональные данные. Данные могут обрабатываться провайдером хостинга, на серверах которого размещён сайт. Для отображения шрифтов браузер посетителя обращается к сервису Google Fonts, при этом сервису передаются IP-адрес и сведения о браузере. Оператор вправе раскрыть данные по обоснованному запросу уполномоченных органов.</p>
+<h2>6. Хранение</h2>
+<p>Данные хранятся не дольше, чем необходимо для целей обработки. Опубликованный отзыв остаётся на сайте, пока вы не попросите его удалить или изменить. Обращения организаций хранятся на время рассмотрения и ещё столько, сколько нужно для подтверждения принятых решений.</p>
+<h2>7. Ваши права</h2>
+<p>Вы можете запросить сведения о том, какие ваши данные мы обрабатываем, потребовать уточнить, заблокировать или удалить их, а также отозвать согласие. Для этого напишите на {ph('email', 'e-mail')}. Мы ответим в сроки, установленные законом. Вы также вправе обратиться в Роскомнадзор.</p>
+<h2>8. Защита данных</h2>
+<p>Мы принимаем организационные и технические меры для защиты данных от случайного или неправомерного доступа, изменения, раскрытия и уничтожения.</p>
+<h2>9. Изменения политики</h2>
+<p>Актуальная редакция всегда размещена на этой странице. Если мы начнём использовать новые инструменты (например, сервис веб-аналитики), политика будет обновлена до их запуска.</p>
+<h2>10. Контакты</h2>
+<p>{op}<br>Адрес: {ph('address', 'адрес')}<br>E-mail: {ph('email', 'e-mail')}</p>
+"""
+    return simple_page(f"Политика конфиденциальности — {SITE}", "Как сайт обрабатывает персональные данные посетителей: состав данных, цели, права пользователей и контакты оператора.",
+                       "politika-konfidencialnosti.html", "Политика конфиденциальности", "Как мы обрабатываем персональные данные посетителей сайта.", body)
+
+
+def cookie_page():
+    body = f"""
+<p class="note-draft">Редакция от {POLICY_DATE}. Список cookie соответствует текущей версии сайта; при подключении аналитики или рекламы его нужно обновить до запуска.</p>
+<h2>Что такое cookie</h2>
+<p>Cookie — небольшие файлы, которые сайт сохраняет в вашем браузере. Они помогают запомнить ваши действия, например то, что вы уже ответили на вопрос о cookie.</p>
+<h2>Какие cookie использует сайт</h2>
+<div class="table-wrap"><table class="data"><thead><tr><th>Название</th><th>Назначение</th><th>Срок</th><th>Тип</th></tr></thead><tbody>
+<tr><td>cookie_consent</td><td>Запоминает, что вы нажали «Согласен» в плашке о cookie, чтобы не показывать её повторно. Дублируется в localStorage браузера.</td><td>12 месяцев</td><td>Необходимый, собственный</td></tr>
+</tbody></table></div>
+<p>Других cookie сайт сейчас не устанавливает. Сервисы веб-аналитики и рекламные сети на сайте не подключены.</p>
+<h2>Сторонние сервисы</h2>
+<p>Для отображения шрифтов браузер обращается к сервису Google Fonts. Сам сервис не требует cookie, но получает ваш IP-адрес и сведения о браузере. Подробнее — в <a class="text-link" href="politika-konfidencialnosti.html">политике конфиденциальности</a>.</p>
+<h2>Как управлять cookie</h2>
+<p>Вы можете удалить cookie или запретить их сохранение в настройках браузера. Если удалить cookie_consent, плашка появится снова. Отключение необходимых cookie не влияет на работу сайта.</p>
+<h2>Если мы подключим аналитику</h2>
+<p>Мы запустим её только после вашего согласия и заранее добавим её cookie в эту таблицу.</p>
+<h2>Контакты</h2>
+<p>По вопросам об обработке данных: {ph('email', 'e-mail')}. Оператор: {ph('name', 'ФИО или наименование оператора')}.</p>
+"""
+    return simple_page(f"Политика cookie — {SITE}", "Какие файлы cookie использует сайт, зачем они нужны и как ими управлять.",
+                       "politika-cookie.html", "Политика cookie", "Какие cookie использует сайт и как ими управлять.", body)
+
+
+def company_page_for_orgs():
+    body = f"""
+<p>Рейтинг составлен по открытым данным, и в нём могут быть ошибки или устаревшие сведения. Если вы представляете организацию из рейтинга, напишите нам: мы проверим сведения и при необходимости исправим карточку.</p>
+<h2>С чем можно обратиться</h2>
+<ul>
+<li>неверные или устаревшие контакты, адрес, режим работы, сроки оценки;</li>
+<li>неверные цены или условия сделки;</li>
+<li>ошибки в тексте обзора: факты, которые можно проверить;</li>
+<li>претензии к опубликованным материалам.</li>
+</ul>
+<h2>Как мы рассматриваем обращения</h2>
+<ol class="steps-list">
+<li>Вы отправляете форму ниже или пишете на {ph('email', 'e-mail')}. Укажите, что именно неверно, и приложите ссылку на страницу сайта, документ или другое подтверждение.</li>
+<li>Мы проверяем сведения по открытым источникам и отвечаем в течение {CLAIM_DAYS} рабочих дней.</li>
+<li>Если ошибка подтверждена, исправляем данные и при необходимости пересчитываем оценку. Если не подтверждена, объясняем почему.</li>
+<li>По вашей просьбе мы можем опубликовать краткий ответ компании в карточке.</li>
+</ol>
+<h2>Что мы не меняем</h2>
+<ul>
+<li>Оценку, которая рассчитана по формуле из <a class="text-link" href="metodika.html#score">методики</a>, если сведения, на которых она основана, верны.</li>
+<li>Мнения и выводы обзоров, основанные на проверяемых фактах: оценочные суждения мы не удаляем по просьбе компании.</li>
+<li>Заявления компаний о самих себе («5000 сделок», «до 90% рынка»): мы лишь указываем, что это заявления, и не проверяем их.</li>
+</ul>
+<h2>Форма обращения</h2>
+<form class="org-form" id="claimForm" data-endpoint="{e(CLAIM_ENDPOINT)}">
+<label class="lbl">Название организации<input class="field" name="company" required maxlength="120"></label>
+<label class="lbl">Сайт организации<input class="field" name="site" type="url" placeholder="https://" required maxlength="200"></label>
+<label class="lbl">Контактное лицо<input class="field" name="contact" required maxlength="120" autocomplete="name"></label>
+<label class="lbl">E-mail для ответа<input class="field" name="email" type="email" required maxlength="120" autocomplete="email"></label>
+<label class="lbl">Тип обращения<select class="field" name="kind" required><option value="">Выберите</option><option>Исправить контакты, адрес, режим</option><option>Исправить цены или условия</option><option>Ошибка в обзоре</option><option>Претензия</option><option>Другое</option></select></label>
+<label class="lbl">Что нужно исправить<textarea class="field" name="text" rows="6" required maxlength="3000"></textarea></label>
+<label class="lbl">Ссылка на подтверждение<input class="field" name="proof" type="url" placeholder="https://" maxlength="300"></label>
+<label class="check"><input type="checkbox" name="consent" required><span>Я согласен(на) на обработку персональных данных в соответствии с <a class="text-link" href="politika-konfidencialnosti.html">политикой конфиденциальности</a>.</span></label>
+<p class="muted" id="claimMsg" role="status"></p>
+<button class="btn btn-primary" type="submit">Отправить обращение <span class="arrow">→</span></button>
+</form>
+<p class="note">Если форма не открывается или вы предпочитаете письмо, напишите на {ph('email', 'e-mail')}.</p>
+"""
+    return simple_page(f"Для организаций: исправить данные и направить претензию — {SITE}", "Страница для компаний из рейтинга: как исправить данные в карточке, направить претензию и получить ответ.",
+                       "dlya-kompanii.html", "Для организаций", "Нашли ошибку в карточке вашей компании? Расскажите, мы проверим и исправим.", body, eyebrow="Обратная связь")
+
+
+def write_seo_files(pages):
+    urls = "\n".join(
+        f"<url><loc>{SITE_URL}/{p}</loc><lastmod>{BUILD_DATE}</lastmod><priority>{pr}</priority></url>" for p, pr in pages)
+    (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>\n', encoding="utf-8")
+    (ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
 
 def main():

@@ -82,4 +82,18 @@
       if (ev.target.tagName === 'A') { hd.classList.remove('menu-open'); mb.setAttribute('aria-expanded', 'false'); }
     });
   }
+  // Обращение организации
+  var cf = document.getElementById('claimForm');
+  if (cf) {
+    var cm = document.getElementById('claimMsg');
+    cf.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var ep = cf.dataset.endpoint;
+      if (!ep) { cm.textContent = 'Приём обращений ещё не подключён к серверу — обращение не отправлено. Напишите, пожалуйста, на e-mail, указанный на странице.'; return; }
+      var data = Object.fromEntries(new FormData(cf));
+      fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+        .then(function (r) { if (!r.ok) throw 0; cm.textContent = 'Спасибо! Обращение отправлено, мы ответим на e-mail.'; cf.reset(); })
+        .catch(function () { cm.textContent = 'Не удалось отправить обращение. Попробуйте позже или напишите на e-mail.'; });
+    });
+  }
 })();

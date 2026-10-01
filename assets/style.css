@@ -304,3 +304,15 @@ dialog.review .cc-actions{margin-top:14px;justify-content:flex-end}
 .rt-how{display:inline-block;margin-top:12px;color:var(--muted);font-size:12px;text-decoration:underline}
 .rt-how:hover{color:var(--burgundy)}
 .page .rating{margin-bottom:22px;max-width:520px}
+/* юридические страницы и форма для организаций */
+.legal-doc h2{margin:34px 0 12px;color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:28px;font-weight:700}
+.legal-doc ul,.legal-doc ol{margin:0 0 16px 22px;color:var(--muted);line-height:1.75}
+.legal-doc li{margin-bottom:6px}
+.legal-doc a{color:var(--burgundy)}
+.note-draft{padding:12px 16px;border-left:3px solid var(--gold);border-radius:6px;background:#f6efe0;color:#5d4a26;font-size:13px}
+.ph{padding:1px 6px;border-radius:4px;background:#fde8d4;color:#9a4a00;font-weight:600}
+.org-form{display:grid;gap:14px;max-width:640px;margin:18px 0 10px}
+.org-form textarea.field,dialog.review textarea.field{padding:12px 16px;resize:vertical}
+.check{display:flex;gap:10px;align-items:flex-start;color:var(--muted);font-size:13px;line-height:1.55}
+.check input{margin-top:4px}
+.prose .text-link,.legal-doc .text-link,.note .text-link,.muted .text-link{display:inline;font-size:inherit;font-weight:600;letter-spacing:0;text-transform:none;text-decoration:underline}

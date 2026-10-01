@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /standalone/
+Disallow: /tools/
+
+Sitemap: https://valura.example/sitemap.xml
