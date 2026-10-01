@@ -796,7 +796,7 @@ def cover_figure(c):
     for ext in ("jpg", "jpeg", "png", "webp"):
         if (ROOT / "assets" / "shots" / f"{c['slug']}.{ext}").exists():
             return (f'<figure class="cover"><img src="../assets/shots/{c["slug"]}.{ext}" alt="Главная страница {e(c["domain"])}" loading="lazy">'
-                    f'<figcaption>Главная страница сайта {e(c["domain"])}</figcaption></figure>')
+                    f'<figcaption>Главная страница сайта {e(c["domain"])} (снимок на 1 октября 2026)</figcaption></figure>')
     return (f'<figure class="cover"><img src="../assets/ill/{c["slug"]}.svg" alt="Иллюстрация: {e(c["name"])}" width="1200" height="520">'
             f'<figcaption>Иллюстрация: {e(c["name"])}</figcaption></figure>')
 
