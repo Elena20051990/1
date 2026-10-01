@@ -404,6 +404,7 @@ def methodology_page():
 </div>
 </div>
 </section>
+{score_table()}
 {summary_section()}
 </main>
 """ + footer()
@@ -814,7 +815,8 @@ def company_card(c, m=None, topic=None, prefix="", hint=None):
     return f"""<article class="company-card" id="{c['slug']}" data-prices="{'1' if m['price'] not in ('Не публикует', 'Не проверено') else '0'}" data-fast="{'1' if c['slug'] in FAST else '0'}">
 <h3 class="cc-name"><a href="{prefix}c/{c['slug']}.html">{e(c['name'])}</a></h3>
 <div class="cc-body">
-<figure class="cc-img"><img src="{img}" alt="{e(alt)}" loading="lazy" width="1200" height="520"></figure>
+<div class="cc-side"><figure class="cc-img"><img src="{img}" alt="{e(alt)}" loading="lazy" width="1200" height="520"></figure>
+{rating_block(c, compact=True)}</div>
 <div class="cc-main">
 <dl class="cc-facts">
 <div><dt>График работы</dt><dd>{e(mode)}</dd></div>
@@ -860,7 +862,7 @@ def summary_section():
 def compare_rows(rows):
     return "\n".join(
         f"<tr><td><a href='c/{c['slug']}.html'><strong>{e(c['name'])}</strong></a><br><span class='muted'>{e(c['domain'])}</span></td>"
-        f"<td>{e(mode_of(c))}</td><td>{e(m['speed'])}</td><td>{e(m['price'])}</td><td>{e(m['nom'])}</td></tr>"
+        f"<td><strong>{scores(c)[1]:g}</strong></td><td>{e(mode_of(c))}</td><td>{e(m['speed'])}</td><td>{e(m['price'])}</td><td>{e(m['nom'])}</td></tr>"
         for c, m in rows)
 
 
@@ -872,7 +874,7 @@ def compare_section(rows, title="Сравнение<br>условий", copy="Р
 <p class="section-copy">{copy}</p>
 </div>
 <div class="table-wrap"><table class="data">
-<thead><tr><th>Компания</th><th>Режим</th><th>Скорость оценки</th><th>Цены</th><th>Специализация</th></tr></thead>
+<thead><tr><th>Компания</th><th>Оценка</th><th>Режим</th><th>Скорость оценки</th><th>Цены</th><th>Специализация</th></tr></thead>
 <tbody>
 {compare_rows(rows)}
 </tbody></table></div>
@@ -893,6 +895,97 @@ def review_dialog():
 <div class="cc-actions"><button class="btn btn-outline" type="button" id="reviewCancel">Закрыть</button><button class="btn btn-primary" type="submit">Отправить</button></div>
 </form>
 </dialog>
+"""
+
+
+# ---------------------------------------------------------------- оценка редакции (3 параметра, 1–5)
+# Параметры считаются по правилам из «Методики» только из открытых данных анализа.
+PARAMS = [
+    ("price", "Прозрачность цен"),
+    ("speed", "Скорость и удобство"),
+    ("trust", "Открытость компании"),
+]
+# price: full — ≥20 цен в открытом доступе; partial — есть прайс/ориентиры; guarantee — цен нет, но гарантирует цену по фото; none — цен нет
+# speed_min — верхняя граница заявленной оценки по фото (мин.); hours — часов работы в сутки (24 — круглосуточно); weekdays — только будни
+# checks — 5 признаков открытости: адрес, режим работы, самостоятельный сайт, нет противоречий/устаревших данных, публичные подтверждения
+SCORE_INPUT = {
+    "room-alco.ru":      dict(price="none", speed_min=30, hours=24, weekdays=False, checks=(1, 1, 0, 0, 0)),
+    "diamant-alko.ru":   dict(price="none", speed_min=10, hours=None, weekdays=False, checks=(1, 0, 1, 0, 0)),
+    "700ml.ru":          dict(price="full", speed_min=1440, hours=17, weekdays=False, checks=(1, 1, 0, 1, 0)),
+    "1buyup.ru":         dict(price="partial", speed_min=30, hours=12, weekdays=False, checks=(1, 1, 1, 1, 0)),
+    "reddecanter.ru":    dict(price="partial", speed_min=15, hours=9, weekdays=False, checks=(1, 1, 0, 1, 0)),
+    "skupka-alkogol.ru": dict(price="partial", speed_min=15, hours=9, weekdays=False, checks=(1, 1, 0, 0, 0)),
+    "vykup-alko.ru":     dict(price="guarantee", speed_min=15, hours=11, weekdays=False, checks=(0, 1, 1, 0, 0)),
+    "alkoprikup.ru":     dict(price="none", speed_min=3, hours=10, weekdays=False, checks=(1, 1, 0, 0, 0)),
+    "sellmewine.ru":     dict(price="none", speed_min=15, hours=24, weekdays=False, checks=(1, 1, 1, 0, 0)),
+    "skup-ka.ru":        dict(price="none", speed_min=None, hours=12, weekdays=True, checks=(1, 1, 1, 0, 0)),
+    "kupimalko.ru":      dict(price="guarantee", speed_min=5, hours=14, weekdays=False, checks=(0, 1, 0, 1, 0)),
+    "cupajclub.ru":      dict(price="none", speed_min=5, hours=10, weekdays=False, checks=(1, 1, 0, 0, 0)),
+    "probkabar.com":     dict(price="none", speed_min=15, hours=None, weekdays=False, checks=(0, 0, 1, 0, 0)),
+    "sellawine.ru":      dict(price="none", speed_min=15, hours=13, weekdays=False, checks=(0, 1, 1, 0, 0)),
+    "alcobuyer.ru":      dict(price="none", speed_min=None, hours=24, weekdays=False, checks=(0, 1, 1, 0, 0)),
+    "oldcognac.ru":      dict(price="none", speed_min=None, hours=None, weekdays=False, checks=(1, 0, 0, 1, 0)),
+    "alcovikup.ru":      dict(price="none", speed_min=5, hours=11, weekdays=False, checks=(0, 1, 1, 0, 0)),
+    "prodat-alko.ru":    dict(price="guarantee", speed_min=None, hours=24, weekdays=False, checks=(0, 1, 1, 1, 0)),
+    "alkolombard.ru":    dict(price="none", speed_min=None, hours=17, weekdays=False, checks=(0, 1, 0, 1, 0)),
+    "vikup-alco.ru":     dict(price="none", speed_min=5, hours=None, weekdays=False, checks=(1, 0, 1, 1, 0)),
+}
+assert set(SCORE_INPUT) == {c["domain"] for c in CARDS}
+PRICE_SCORE = {"full": 5, "partial": 4, "guarantee": 2.5, "none": 2}
+
+
+def speed_score(i):
+    m = i["speed_min"]
+    s = 2.5 if m is None else 4.5 if m <= 5 else 4 if m <= 15 else 3 if m <= 30 else 2.5 if m <= 120 else 2
+    h = i["hours"]
+    if h is not None:
+        s += 0.5 if h >= 14 else -0.5 if h <= 9 else 0
+    if i["weekdays"]:
+        s -= 0.5
+    return min(5, max(1, s))
+
+
+def scores(c):
+    i = SCORE_INPUT[c["domain"]]
+    p = {"price": PRICE_SCORE[i["price"]], "speed": speed_score(i), "trust": max(1, sum(i["checks"]))}
+    total = round(sum(p.values()) / 3, 1)
+    return p, total
+
+
+def stars(v, cls=""):
+    return f'<span class="stars {cls}" style="--p:{v / 5 * 100:.0f}%" role="img" aria-label="{v:g} из 5">★★★★★</span>'
+
+
+def rating_block(c, compact=False):
+    p, total = scores(c)
+    rows = "".join(f'<div class="rt-row"><span>{e(lbl)}</span>{stars(p[k], "sm")}<b>{p[k]:g}</b></div>' for k, lbl in PARAMS)
+    return f"""<div class="rating">
+<div class="rt-head"><div class="rt-total">{total:g}</div><div>{stars(total)}<div class="rt-cap">Оценка редакции из 5</div></div></div>
+<div class="rt-rows">{rows}</div>
+<a class="rt-how" href="{'' if compact else '../'}metodika.html#score">Как считается оценка</a>
+</div>
+"""
+
+
+def score_table():
+    rows = "".join(
+        f"<tr><td><strong>{e(c['name'])}</strong></td>" + "".join(f"<td>{scores(c)[0][k]:g}</td>" for k, _ in PARAMS) + f"<td><strong>{scores(c)[1]:g}</strong></td></tr>"
+        for c in CARDS)
+    return f"""<section class="section ranking-section" id="score">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Оценка редакции</span><h2 class="section-title">Как считается<br>оценка</h2></div>
+<p class="section-copy">Три параметра по шкале от 1 до 5. Оценка выставлена по формальным признакам из открытых данных, это не отзывы клиентов и не проверка качества услуг.</p>
+</div>
+<div class="factors">
+<article><h3>Прозрачность цен</h3><p>5 — в открытом доступе 20 и более цен; 4 — есть прайс или ориентиры по части позиций; 2,5 — цен нет, но компания гарантирует цену, согласованную по фото; 2 — цен нет.</p></article>
+<article><h3>Скорость и удобство</h3><p>База по заявленному сроку оценки по фото: до 5 минут — 4,5; до 15 — 4; до 30 — 3; до 2 часов — 2,5; дольше — 2; срок не указан — 2,5. Плюс 0,5 за работу 14 часов в сутки и больше, минус 0,5 за 9 часов и меньше и ещё минус 0,5, если только по будням.</p></article>
+<article><h3>Открытость компании</h3><p>По баллу за каждый признак: указан адрес; указан режим работы; сайт самостоятельный (не похож на сайт другого оператора); нет противоречий и устаревших данных; есть публичные подтверждения (кейсы, датированные отзывы). Минимум — 1.</p></article>
+</div>
+<p class="note">Итоговая оценка — среднее трёх параметров, округлённое до десятых. Публичных подтверждений в открытых данных не нашлось ни у кого, поэтому пятёрки по открытости нет у всех. Сроки и режимы — заявления компаний. Оценка отражает данные на дату сбора и может измениться.</p>
+<div class="table-wrap"><table class="data"><thead><tr><th>Компания</th><th>Прозрачность цен</th><th>Скорость и удобство</th><th>Открытость</th><th>Итого</th></tr></thead><tbody>{rows}</tbody></table></div>
+</div>
+</section>
 """
 
 
@@ -939,6 +1032,7 @@ def company_page(c, i):
 <p class="lead">Скупка алкоголя: {e(c['meta']['nom'][0].lower() + c['meta']['nom'][1:])}.</p>
 {note}{own}{warn}
 {cover_figure(c)}
+{rating_block(c)}
 <div class="badges">
 <div class="badge"><span>График работы</span><strong>{e(mode_of(c))}</strong></div>
 <div class="badge"><span>Оценка по фото</span><strong>{e(c['meta']['speed'])}</strong></div>
