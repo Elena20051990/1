@@ -16,11 +16,11 @@ LINES = [html.unescape(l).rstrip() for l in TXT.split("\n")]
 # ---- Настройки, которые нужно заполнить перед запуском -------------------------------------------
 SITE_URL = "https://valura.example"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
 OPERATOR = dict(                      # оператор персональных данных (подставляется в политики и на страницу «Для компаний»)
-    name="",      # ФИО или название организации/ИП
-    inn="",       # ИНН (и ОГРН/ОГРНИП, если есть)
-    address="",   # адрес для обращений
+    name="Александр Викторович Воронцов",      # ФИО или название организации/ИП
+    inn="",       # необязательно: если пусто — ИНН нигде не показывается
+    address="",   # необязательно: если пусто — адрес нигде не показывается
     email="",     # e-mail для обращений
-    phone="",     # телефон редакции (показывается в подвале и на странице «Контакты», если заполнен)
+    phone="",     # необязательно: показывается только если заполнено
     telegram="",  # Telegram редакции, например @valura_rating
 )
 # Как подключать шапку и подвал: "inline" — блок вставляется в каждую страницу при сборке (работает на любом хостинге);
@@ -33,11 +33,11 @@ INCLUDE_MODE = "inline"
 EXPERT = dict(
     show=True,        # блок показывается; поставьте False, чтобы скрыть
     name="Александр Викторович Воронцов",
-    role="Эксперт-консультант по винам",
+    role="Оператор сайта · эксперт-консультант по винам",
     about="Профессиональный сомелье с 15-летним опытом в винной культуре, ресторанном бизнесе и экспертной дегустации. Специализируется на европейских винах, винодельческих регионах Франции, Италии и Испании. Формировал винные карты ресторанов и консультировал частных коллекционеров по подбору и хранению вин. Консультирует редакцию по разделам сайта о вине и шампанском.",
     credentials="Стаж: 15 лет · Москва. Образование: Wine & Spirit Education Trust (WSET). Профессиональная квалификация: Court of Master Sommeliers.",   # допишите уровни и годы, когда будут документы
     photo="assets/expert.jpg",   # фото эксперта; без файла блок показывается без фото
-    disclosure="Эксперт сотрудничает с редакцией на договорной основе и не получает вознаграждения от компаний рейтинга. Он не является автором обзоров компаний и не отвечает за оценки скупок: они составляются редакцией по методике.",
+    disclosure="Александр Воронцов — оператор сайта и эксперт-консультант по винам. Он не получает вознаграждения от компаний рейтинга. Оценки скупок рассчитываются по опубликованной методике, а обзоры компаний готовит редакция.",
 )
 
 
@@ -202,6 +202,12 @@ def ph(key, label):
     return e(v) if v else f'<span class="ph">[укажите {label}]</span>'
 
 
+def opt(key, fmt):
+    """Необязательный реквизит: пусто, пока не заполнен в OPERATOR."""
+    v = OPERATOR.get(key, "")
+    return fmt.format(e(v)) if v else ""
+
+
 def jsonld(*objs):
     import json
     return "\n".join('<script type="application/ld+json">' + json.dumps(o, ensure_ascii=False).replace("</", "<\\/") + "</script>" for o in objs if o)
@@ -319,14 +325,14 @@ def head(title, desc, depth=0, path="", ld=None):
     p = "../" * depth
     url = f"{SITE_URL}/{path}"
     site_ld = {"@context": "https://schema.org", "@type": "WebSite", "name": SITE, "url": SITE_URL + "/", "inLanguage": "ru"}
-    org = {"@context": "https://schema.org", "@type": "Organization", "name": OPERATOR.get("name") or SITE, "url": SITE_URL + "/", "logo": f"{SITE_URL}/assets/og.png"}
+    org = {"@context": "https://schema.org", "@type": "Organization", "name": SITE, "url": SITE_URL + "/", "logo": f"{SITE_URL}/assets/og.png"}
     if OPERATOR.get("email"):
         org["email"] = OPERATOR["email"]
         org["contactPoint"] = {"@type": "ContactPoint", "contactType": "customer support", "email": OPERATOR["email"], "availableLanguage": "ru"}
     if OPERATOR.get("address"):
         org["address"] = OPERATOR["address"]
     page_ld = {"@context": "https://schema.org", "@type": "WebPage", "name": title, "url": url, "description": desc, "inLanguage": "ru",
-               "dateModified": BUILD_DATE, "isPartOf": {"@type": "WebSite", "name": SITE, "url": SITE_URL + "/"}, "publisher": {"@type": "Organization", "name": OPERATOR.get("name") or SITE}}
+               "dateModified": BUILD_DATE, "isPartOf": {"@type": "WebSite", "name": SITE, "url": SITE_URL + "/"}, "publisher": {"@type": "Organization", "name": SITE}}
     verify = (f'<meta name="google-site-verification" content="{e(GOOGLE_VERIFY)}">\n' if GOOGLE_VERIFY else "") + (f'<meta name="yandex-verification" content="{e(YANDEX_VERIFY)}">\n' if YANDEX_VERIFY else "")
     return f"""<!DOCTYPE html>
 <html lang="ru">
@@ -472,7 +478,7 @@ def age_gate_html():
 def footer_inline(depth=0, base=None):
     p = base if base else "../" * depth
     home = base if base else (p or "./")
-    op = f"Оператор сайта: {ph('name', 'ФИО или наименование оператора')}, ИНН {ph('inn', 'ИНН')}"
+    op = f"Оператор сайта: {ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}"
     return f"""<footer class="footer">
 <div class="container">
 <div class="footer-main">
@@ -1799,11 +1805,11 @@ def simple_page(title, desc, path, h1, lead, body, eyebrow="Документ"):
 
 
 def privacy_page():
-    op = f"{ph('name', 'ФИО или наименование оператора')}, ИНН {ph('inn', 'ИНН')}"
+    op = f"{ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}"
     body = f"""
 <p class="note-draft">Редакция от {POLICY_DATE}. Текст подготовлен как рабочий шаблон: подставьте реквизиты оператора и согласуйте текст с юристом.</p>
 <h2>1. Общие положения</h2>
-<p>Настоящая политика описывает, как сайт «{SITE}» ({SITE_URL}) обрабатывает персональные данные посетителей. Оператор персональных данных — {op}, адрес для обращений: {ph('address', 'адрес')}, e-mail: {ph('email', 'e-mail')}. Политика составлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
+<p>Настоящая политика описывает, как сайт «{SITE}» ({SITE_URL}) обрабатывает персональные данные посетителей. Оператор персональных данных — {op}{opt('address', ', адрес для обращений: {}')}, e-mail для обращений: {ph('email', 'e-mail')}. Политика составлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
 <p>Сайт — информационный справочник со сравнением компаний, которые скупают алкоголь. Сайт не оказывает и не продаёт услуги и не предназначен для лиц младше 18 лет.</p>
 <h2>2. Какие данные мы обрабатываем</h2>
 <ul>
@@ -1834,7 +1840,7 @@ def privacy_page():
 <h2>9. Изменения политики</h2>
 <p>Актуальная редакция всегда размещена на этой странице. Если мы начнём использовать новые инструменты (например, сервис веб-аналитики), политика будет обновлена до их запуска.</p>
 <h2>10. Контакты</h2>
-<p>{op}<br>Адрес: {ph('address', 'адрес')}<br>E-mail: {ph('email', 'e-mail')}</p>
+<p>{op}{opt('address', '<br>Адрес: {}')}<br>E-mail: {ph('email', 'e-mail')}</p>
 """
     return simple_page(f"Политика конфиденциальности — {SITE}", "Как сайт обрабатывает персональные данные посетителей: состав данных, цели, права пользователей и контакты оператора.",
                        "politika-konfidencialnosti.html", "Политика конфиденциальности", "Как мы обрабатываем персональные данные посетителей сайта.", body)
@@ -1858,7 +1864,7 @@ def cookie_page():
 <h2>Если мы подключим аналитику</h2>
 <p>Мы запустим её только после вашего согласия и заранее добавим её cookie в эту таблицу.</p>
 <h2>Контакты</h2>
-<p>По вопросам об обработке данных: {ph('email', 'e-mail')}. Оператор: {ph('name', 'ФИО или наименование оператора')}.</p>
+<p>По вопросам об обработке данных: {ph('email', 'e-mail')}. Оператор: {ph('name', 'ФИО оператора')}.</p>
 """
     return simple_page(f"Политика cookie — {SITE}", "Какие файлы cookie использует сайт, зачем они нужны и как ими управлять.",
                        "politika-cookie.html", "Политика cookie", "Какие cookie использует сайт и как ими управлять.", body)
@@ -1910,7 +1916,7 @@ def contacts_page():
     body = f"""
 <p>Сайт «{SITE}» — независимый справочник и не оказывает услуг по скупке алкоголя. Через эту страницу можно связаться с редакцией.</p>
 <h2>Редакция</h2>
-<p>Оператор сайта: {ph('name', 'ФИО или наименование оператора')}<br>ИНН: {ph('inn', 'ИНН')}<br>Адрес для обращений: {ph('address', 'адрес')}<br>E-mail: {ph('email', 'e-mail')}<br>Телефон: {ph('phone', 'телефон')}<br>Telegram: {ph('telegram', 'Telegram')}</p>
+<p>Оператор сайта: {ph('name', 'ФИО оператора')}{opt('inn', '<br>ИНН: {}')}{opt('address', '<br>Адрес для обращений: {}')}<br>E-mail: {ph('email', 'e-mail')}{opt('phone', '<br>Телефон: {}')}{opt('telegram', '<br>Telegram: {}')}</p>
 <h2>По какому вопросу писать</h2>
 <ul>
 <li><strong>Вы представляете компанию из рейтинга</strong> и нашли ошибку или хотите направить претензию — <a class="text-link" href="dlya-kompanii.html">страница для организаций</a>.</li>
@@ -2069,7 +2075,7 @@ def terms_page():
 <h2>6. Изменения и применимое право</h2>
 <p>Мы вправе изменять правила; актуальная редакция всегда размещена на этой странице. К отношениям применяется право Российской Федерации.</p>
 <h2>7. Контакты</h2>
-<p>{ph('name', 'ФИО или наименование оператора')}, ИНН {ph('inn', 'ИНН')}, e-mail: {ph('email', 'e-mail')}. Страница <a class="text-link" href="kontakty.html">«Контакты»</a>.</p>
+<p>{ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}, e-mail: {ph('email', 'e-mail')}. Страница <a class="text-link" href="kontakty.html">«Контакты»</a>.</p>
 """
     return simple_page(f"Правила пользования сайтом — {SITE}", "Правила использования сайта: возрастное ограничение, цитирование материалов, правила отзывов и обращений.",
                        "pravila-polzovaniya.html", "Правила пользования сайтом", "Как пользоваться сайтом и что запрещено.", body)
