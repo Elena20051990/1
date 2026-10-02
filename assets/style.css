@@ -356,3 +356,9 @@ body.age-lock{overflow:hidden}
 .footer-brand{display:inline-block;padding:10px 14px;background:#fff;border-radius:8px}
 .footer-brand img{height:56px;width:auto;display:block}
 @media(max-width:700px){.nav-logo img{height:44px}}
+.keyfacts{padding:28px 0 8px}
+.keyfacts .sub{margin-bottom:12px;font-size:26px}
+.keyfacts .goals{display:block;margin:0;padding:6px 20px;border:1px solid var(--line);border-radius:12px;background:#fff;list-style:none}
+.keyfacts .goals li{position:relative;display:block;margin:0;padding:9px 0 9px 20px;border:0;border-radius:0;background:none;box-shadow:none;font-size:15px;line-height:1.5}
+.keyfacts .goals li+li{border-top:1px solid var(--line)}
+.keyfacts .goals li::before{content:"";position:absolute;left:0;top:17px;width:7px;height:7px;border-radius:50%;background:var(--gold)}
