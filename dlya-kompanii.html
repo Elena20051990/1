@@ -88,7 +88,7 @@
 <li>Заявления компаний о самих себе («5000 сделок», «до 90% рынка»): мы лишь указываем, что это заявления, и не проверяем их.</li>
 </ul>
 <h2>Форма обращения</h2>
-<form class="org-form" id="claimForm" data-endpoint="">
+<form class="org-form" id="claimForm" data-endpoint="/send.php?type=claim">
 <label class="lbl">Название организации<input class="field" name="company" required maxlength="120"></label>
 <label class="lbl">Сайт организации<input class="field" name="site" type="url" placeholder="https://" required maxlength="200"></label>
 <label class="lbl">Контактное лицо<input class="field" name="contact" required maxlength="120" autocomplete="name"></label>
@@ -130,7 +130,7 @@
 </div>
 </footer>
 <dialog id="reviewDialog" class="review">
-<form method="dialog" id="reviewForm" data-endpoint="">
+<form method="dialog" id="reviewForm" data-endpoint="/send.php?type=review">
 <h3 class="sub" style="margin:0 0 6px">Оставить отзыв</h3>
 <p class="muted" id="reviewCompany" style="margin-bottom:14px"></p>
 <label class="lbl">Ваше имя<input class="field" name="name" maxlength="80" autocomplete="name"></label>

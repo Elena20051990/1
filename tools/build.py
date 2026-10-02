@@ -46,8 +46,8 @@ EXPERT = dict(
 PLACEMENT_IS_FREE = True              # True — только если размещение компаний в рейтинге бесплатно и вы не получаете от них вознаграждения (тогда это попадает в методику и редакционную политику)
 AGE_GATE = True                       # окно «Вам исполнилось 18 лет?» при первом визите
 CLAIM_DAYS = 10                       # срок рассмотрения обращений организаций, рабочих дней (подтвердите, что успеваете)
-REVIEW_ENDPOINT = ""                  # куда отправлять отзывы читателей (JSON, POST); пусто — форма сообщает, что не подключена
-CLAIM_ENDPOINT = ""                   # куда отправлять обращения организаций (JSON, POST)
+REVIEW_ENDPOINT = "/send.php?type=review"                  # куда отправлять отзывы читателей (JSON, POST); пусто — форма сообщает, что не подключена
+CLAIM_ENDPOINT = "/send.php?type=claim"                   # куда отправлять обращения организаций (JSON, POST)
 GOOGLE_VERIFY = ""                    # содержимое meta google-site-verification (Search Console)
 YANDEX_VERIFY = ""                    # содержимое meta yandex-verification (Яндекс Вебмастер)
 BUILD_DATE = "2026-10-01"             # дата для sitemap (lastmod)

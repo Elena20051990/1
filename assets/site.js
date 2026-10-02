@@ -51,7 +51,7 @@
     form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var ep = form.dataset.endpoint;
-      if (!ep) { msg.textContent = 'Приём отзывов ещё не подключён к серверу — отзыв не отправлен.'; return; }
+      if (!ep) { msg.textContent = 'Приём отзывов временно недоступен. Напишите нам на e-mail, указанный на странице «Контакты».'; return; }
       var data = Object.fromEntries(new FormData(form)); data.company = who;
       fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
         .then(function (r) { if (!r.ok) throw 0; msg.textContent = 'Спасибо! Отзыв отправлен.'; form.reset(); })
