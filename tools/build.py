@@ -27,6 +27,8 @@ OPERATOR = dict(                      # оператор персональны�
 # "ssi" — на страницах стоит директива <!--#include virtual="/includes/header.html" --> (нужна поддержка SSI на сервере и размещение в корне домена).
 # Файлы includes/header.html и includes/footer.html создаются при любом режиме.
 INCLUDE_MODE = "inline"
+# Индексация: False — сайт закрыт (meta noindex, robots.txt Disallow: /, заголовок X-Robots-Tag через .htaccess). Для открытия поставьте True и пересоберите.
+ALLOW_INDEXING = False
 
 # Автор и эксперт сайта. Блок показывается только при show=True и только когда вы подтвердили реальные сведения:
 # имя и фото используются с согласия человека, должность и квалификация подтверждаются документами.
@@ -341,7 +343,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
-<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="robots" content="{ROBOTS_META}">
 <meta name="theme-color" content="#431f2a">
 <link rel="canonical" href="{url}">
 {verify}<link rel="alternate" type="application/json" href="{SITE_URL}/data/companies.json" title="Данные рейтинга (JSON)">
@@ -2081,10 +2083,18 @@ def terms_page():
                        "pravila-polzovaniya.html", "Правила пользования сайтом", "Как пользоваться сайтом и что запрещено.", body)
 
 
+ROBOTS_META = "index, follow, max-image-preview:large" if ALLOW_INDEXING else "noindex, nofollow, noarchive"
+
+
 def write_seo_files(pages):
     urls = "\n".join(
         f"<url><loc>{SITE_URL}/{p}</loc><lastmod>{BUILD_DATE}</lastmod><priority>{pr}</priority></url>" for p, pr in pages)
     (ROOT / "sitemap.xml").write_text(f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{urls}\n</urlset>\n', encoding="utf-8")
+    if not ALLOW_INDEXING:
+        (ROOT / "robots.txt").write_text("# Сайт закрыт от индексации\nUser-agent: *\nDisallow: /\n", encoding="utf-8")
+        (ROOT / ".htaccess").write_text('<IfModule mod_headers.c>\nHeader set X-Robots-Tag "noindex, nofollow, noarchive"\n</IfModule>\n', encoding="utf-8")
+        return
+    (ROOT / ".htaccess").unlink(missing_ok=True)
     bots = "".join(f"User-agent: {b}\nAllow: /\n\n" for b in AI_BOTS)
     (ROOT / "robots.txt").write_text(f"# Поисковые и ИИ-краулеры допускаются явно; служебные папки закрыты для всех\n{bots}User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\nDisallow: /includes/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
