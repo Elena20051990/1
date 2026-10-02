@@ -2100,13 +2100,46 @@ def write_seo_files(pages):
     (ROOT / "robots.txt").write_text(f"# Поисковые и ИИ-краулеры допускаются явно; служебные папки закрыты для всех\n{bots}User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\nDisallow: /includes/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
 
+# Фото-полосы между текстовыми блоками: (файл страницы) -> [(id секции, перед которой вставить, картинка, подпись, текст, ссылка, текст кнопки)]
+BANDS = {
+    "index.html": [
+        ("calc", "banner2.jpg", "Прежде чем продавать", "Сравните не только цену, но и условия сделки: срок оценки, способ оплаты и выезд курьера.", "#choose", "Пять вопросов перед сделкой"),
+        ("prepare", "banner3.jpg", "Подготовка", "Коробка, документы и сохранность этикетки заметно влияют на итоговую цену выкупа.", "#prepare", "Как подготовить бутылку"),
+        ("faq", "banner2.jpg", "Прозрачность", "Рейтинг составлен по открытым данным и единой методике: правила и расчёты опубликованы.", "metodika.html", "Читать методику"),
+    ],
+    "gde-prodat-elitnyy-alkogol.html": [
+        ("topic", "banner2.jpg", "Редкие бутылки", "Для дорогих бутылок особенно важны подлинность, комплектность и условия хранения.", "#guide", "Что считается элитным"),
+        ("faq", "banner3.jpg", "Перед сделкой", "Сфотографируйте этикетку, пробку и уровень жидкости: так оценка пройдёт быстрее.", "#prepare", "Как подготовить бутылку"),
+    ],
+    "gde-prodat-elitnoe-shampanskoe.html": [
+        ("topic", "banner.jpg", "Шампанское", "Цена зависит от дома, года урожая, кюве и сохранности бутылки.", "#guide", "Какое шампанское ценится"),
+        ("faq", "banner2.jpg", "Перед сделкой", "Условия хранения и целая упаковка помогают сохранить стоимость шампанского.", "#prepare", "Как подготовить бутылку"),
+    ],
+}
+
+
+def add_bands(page, key):
+    for sid, img, eyebrow, text, href, label in BANDS.get(key, []):
+        marker = f'id="{sid}"'
+        i = page.find(marker)
+        if i < 0:
+            continue
+        j = page.rfind("<section", 0, i)
+        cls = img.split(".")[0].replace("banner", "band-")
+        band = (f'<section class="photo-band {cls}"><div class="container">'
+                f'<span class="eyebrow">{e(eyebrow)}</span><p>{e(text)}</p>'
+                f'<a class="btn btn-primary" href="{href}">{e(label)} <span class="arrow">→</span></a></div></section>\n')
+        page = page[:j] + band + page[j:]
+    return page
+
+
 def main():
-    (ROOT / "index.html").write_text(index_page(), encoding="utf-8")
+    (ROOT / "index.html").write_text(add_bands(index_page(), "index.html"), encoding="utf-8")
     (ROOT / "prices.html").write_text(prices_page(), encoding="utf-8")
     (ROOT / "metodika.html").write_text(methodology_page(), encoding="utf-8")
     (ROOT / "o-reitinge.html").write_text(about_page(), encoding="utf-8")
     for tp in TOPICS:
-        (ROOT / tp["file"]).write_text(topic_page(tp), encoding="utf-8")
+        (ROOT / tp["file"]).write_text(add_bands(topic_page(tp), tp["file"]), encoding="utf-8")
     (ROOT / "c").mkdir(exist_ok=True)
     write_covers()
     for i, c in enumerate(CARDS):
