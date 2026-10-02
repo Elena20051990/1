@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 420" fill="none">
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2c27d" stop-opacity=".9"/><stop offset="1" stop-color="#b8924e" stop-opacity=".35"/></linearGradient></defs>
+<g stroke="url(#g)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+<!-- высокая бутылка -->
+<path d="M120 20h28v14h-28z" fill="#e2c27d" fill-opacity=".35"/>
+<path d="M122 34h24v70c0 24 34 44 34 84v212h-92V188c0-40 34-60 34-84z" fill="#e2c27d" fill-opacity=".08"/>
+<rect x="100" y="230" width="68" height="96" rx="4" fill="#e2c27d" fill-opacity=".14"/>
+<path d="M112 262h44M112 280h44M112 298h30" stroke-width="1.6"/>
+<path d="M92 372h92" stroke-opacity=".5"/>
+<!-- круглая бутылка -->
+<path d="M262 120h26v16h-26z" fill="#e2c27d" fill-opacity=".35"/>
+<path d="M264 136h22v44c0 18 40 34 40 84 0 44-26 76-51 76s-51-32-51-76c0-50 40-66 40-84z" fill="#e2c27d" fill-opacity=".08"/>
+<rect x="238" y="272" width="74" height="60" rx="30" fill="#e2c27d" fill-opacity=".14"/>
+<path d="M250 296h50M254 312h42" stroke-width="1.6"/>
+<!-- бокал -->
+<path d="M388 196h86c0 64-20 98-43 98s-43-34-43-98z" fill="#e2c27d" fill-opacity=".08"/>
+<path d="M392 232h78c-2 40-16 62-39 62s-37-22-39-62z" fill="#e2c27d" fill-opacity=".25"/>
+<path d="M431 294v66M398 360h66" />
+</g></svg>
