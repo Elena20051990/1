@@ -282,17 +282,17 @@ def key_facts(rows, topic=None):
     fast = [c for c in CARDS if SCORE_INPUT[c["domain"]]["speed_min"] is not None]
     quick = min(fast, key=lambda c: SCORE_INPUT[c["domain"]]["speed_min"])
     slow = max(fast, key=lambda c: SCORE_INPUT[c["domain"]]["speed_min"])
-    items = [f"В рейтинге {len(CARDS)} компаний; открытые цены публикуют {len(priced)}: {', '.join(priced)}."]
+    items = [f"В рейтинге **{len(CARDS)} компаний**; открытые цены публикуют **{len(priced)}**: {', '.join(priced)}."]
     if topic == "champagne":
         n = [x for r in CHAMP_ROWS for col in (1, 3) for x in _nums(r[col])]
-        items.append(f"Цены на шампанское публикуют только 700ml и Red Decanter: от {fmt_rub(min(n))} до {fmt_rub(max(n))} ₽ за бутылку по их прайсам (цены «от» и приблизительные).")
+        items.append(f"Цены на шампанское публикуют **только 700ml и Red Decanter**: от {fmt_rub(min(n))} до {fmt_rub(max(n))} ₽ за бутылку по их прайсам (цены «от» и приблизительные).")
     elif topic == "elite":
-        items.append("Для дорогих и редких бутылок профильны Red Decanter (до 5 000 000 ₽ в прайсе), 700ml (до 200 000 ₽, Petrus), SKUPKA-ALKOGOL (сегменты до «свыше 100 000 ₽»).")
-    items.append("Типичный уровень выкупа — 67–72% рыночной цены бутылки по опубликованным таблицам скупок; обещания «до 90%» и «до 100%» — рекламные заявления.")
-    items.append(f"Заявленный срок оценки по фото: самый быстрый — {quick['meta']['speed'].lower()} ({quick['name']}), самый медленный — {slow['meta']['speed'].lower()} ({slow['name']}).")
-    items.append(f"Высшая оценка редакции — {scores(top)[1]:g} из 5 ({top['name']}); оценка считается по трём параметрам, правила — в методике.")
-    items.append("Часть сайтов, вероятно, принадлежит одному оператору: 700ml, Alko Lombard и oldcognac; Red Decanter и SKUPKA-ALKOGOL; Cupaj Club и Alko Prikup.")
-    li = "".join(f"<li>{e(x)}</li>" for x in items)
+        items.append("Для дорогих и редких бутылок профильны **Red Decanter** (до 5 000 000 ₽ в прайсе), 700ml (до 200 000 ₽, Petrus), SKUPKA-ALKOGOL (сегменты до «свыше 100 000 ₽»).")
+    items.append("Типичный уровень выкупа — **67–72% рыночной цены** бутылки по опубликованным таблицам скупок; обещания «до 90%» и «до 100%» — **рекламные заявления**.")
+    items.append(f"Заявленный срок оценки по фото: самый быстрый — **{quick['meta']['speed'].lower()}** ({quick['name']}), самый медленный — **{slow['meta']['speed'].lower()}** ({slow['name']}).")
+    items.append(f"Высшая оценка редакции — **{scores(top)[1]:g} из 5** ({top['name']}); оценка считается по трём параметрам, правила — в методике.")
+    items.append("Часть сайтов, **вероятно, принадлежит одному оператору**: 700ml, Alko Lombard и oldcognac; Red Decanter и SKUPKA-ALKOGOL; Cupaj Club и Alko Prikup.")
+    li = "".join("<li>" + re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", e(x)) + "</li>" for x in items)
     return f"""<section class="section keyfacts" id="summary-short"><div class="container narrow"><h2 class="sub" style="margin-top:0">Коротко</h2><ul class="goals">{li}</ul></div></section>
 """
 
