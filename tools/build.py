@@ -27,6 +27,18 @@ OPERATOR = dict(                      # оператор персональны�
 # "ssi" — на страницах стоит директива <!--#include virtual="/includes/header.html" --> (нужна поддержка SSI на сервере и размещение в корне домена).
 # Файлы includes/header.html и includes/footer.html создаются при любом режиме.
 INCLUDE_MODE = "inline"
+
+# Автор и эксперт сайта. Блок показывается только при show=True и только когда вы подтвердили реальные сведения:
+# имя и фото используются с согласия человека, должность и квалификация подтверждаются документами.
+EXPERT = dict(
+    show=False,
+    name="",          # ФИО реального человека, который согласен быть названным
+    role="",          # должность/роль, подтверждаемая документами
+    about="",         # 2–3 предложения: опыт, чем занимается, как связан с темой рейтинга
+    credentials="",   # например: образование, сертификаты, стаж (только то, что можно подтвердить)
+    photo="assets/expert.jpg",   # файл положите в assets/; без него блок показывается без фото
+    disclosure="",    # например: «Автор не получает вознаграждения от компаний рейтинга». Если консультирует платно — укажите это здесь
+)
 PLACEMENT_IS_FREE = False             # True — только если размещение компаний в рейтинге бесплатно и вы не получаете от них вознаграждения (тогда это попадает в методику и редакционную политику)
 AGE_GATE = True                       # окно «Вам исполнилось 18 лет?» при первом визите
 CLAIM_DAYS = 10                       # срок рассмотрения обращений организаций, рабочих дней (подтвердите, что успеваете)
@@ -296,7 +308,7 @@ def review_ld(c):
         org["address"] = {"@type": "PostalAddress", "streetAddress": addr}
     r = REVIEWS[c["domain"]]
     return {"@context": "https://schema.org", "@type": "Review", "itemReviewed": org,
-            "author": {"@type": "Organization", "name": SITE},
+            "author": ({"@type": "Person", "name": EXPERT["name"]} if EXPERT["show"] else {"@type": "Organization", "name": SITE}),
             "reviewRating": {"@type": "Rating", "ratingValue": scores(c)[1], "bestRating": 5, "worstRating": 1},
             "name": f"{c['name']}: оценка редакции", "reviewBody": f"{r['lead']} {r['verdict']}", "inLanguage": "ru"}
 
@@ -395,6 +407,30 @@ def write_includes():
     d.mkdir(exist_ok=True)
     (d / "header.html").write_text(header_inline(base="/"), encoding="utf-8")
     (d / "footer.html").write_text(footer_inline(base="/"), encoding="utf-8")
+
+
+def expert_ld():
+    if not EXPERT["show"]:
+        return None
+    d = {"@context": "https://schema.org", "@type": "Person", "name": EXPERT["name"], "jobTitle": EXPERT["role"], "url": SITE_URL + "/o-reitinge.html"}
+    if EXPERT["about"]:
+        d["description"] = EXPERT["about"]
+    return d
+
+
+def expert_block(depth=0):
+    """Карточка автора и эксперта; пусто, пока EXPERT['show'] = False."""
+    if not EXPERT["show"]:
+        return ""
+    p = "../" * depth
+    photo = ""
+    if (ROOT / EXPERT["photo"]).exists():
+        photo = f'<img class="ex-photo" src="{p}{EXPERT["photo"]}" alt="{e(EXPERT["name"])}" width="160" height="160" loading="lazy">'
+    about = f"<p>{e(EXPERT['about'])}</p>" if EXPERT["about"] else f"<p>{ph('name', 'коротко об опыте автора')}</p>"
+    cred = f"<p class=\"ex-cred\">{e(EXPERT['credentials'])}</p>" if EXPERT["credentials"] else ""
+    disc = f"<p class=\"ex-disc\">{e(EXPERT['disclosure'])}</p>" if EXPERT["disclosure"] else f"<p class=\"ex-disc\">{ph('name', 'раскройте связь автора с оцениваемыми компаниями и платные услуги автора, если они есть')}</p>"
+    return f"""<section class="expert" id="author"><div class="ex-card">{photo}<div><span class="eyebrow">Автор и эксперт</span><h2 class="ex-name">{e(EXPERT['name'])}</h2><p class="ex-role">{e(EXPERT['role'])}</p>{about}{cred}{disc}</div></div></section>
+"""
 
 
 def contact_line():
@@ -724,7 +760,7 @@ def methodology_page():
 def about_page():
     return head(f"О рейтинге скупок алкоголя — {SITE}",
                 "О проекте: независимый рейтинг скупок элитного и коллекционного алкоголя в Москве. Сайт не оказывает и не продаёт услуги, информация носит справочный характер.",
-                path="o-reitinge.html", ld=[{"@context": "https://schema.org", "@type": "AboutPage", "name": f"О рейтинге — {SITE}", "url": f"{SITE_URL}/o-reitinge.html", "inLanguage": "ru"}, breadcrumbs(("Главная", ""), ("О рейтинге", "o-reitinge.html"))]) + header() + f"""
+                path="o-reitinge.html", ld=[{"@context": "https://schema.org", "@type": "AboutPage", "name": f"О рейтинге — {SITE}", "url": f"{SITE_URL}/o-reitinge.html", "inLanguage": "ru"}, breadcrumbs(("Главная", ""), ("О рейтинге", "o-reitinge.html")), expert_ld()]) + header() + f"""
 <main id="top">
 <section class="topic-hero">
 <div class="container">
@@ -733,6 +769,7 @@ def about_page():
 <p class="lead">Независимый рейтинг компаний, которые покупают элитный и коллекционный алкоголь в Москве.</p>
 </div>
 </section>
+{expert_block()}
 <section class="section">
 <div class="container narrow">
 <div class="prose">
@@ -1869,6 +1906,7 @@ def contacts_page():
 <li><strong>Вопросы о персональных данных</strong> (доступ, удаление, отзыв согласия) — на тот же e-mail, см. <a class="text-link" href="politika-konfidencialnosti.html">политику конфиденциальности</a>.</li>
 </ul>
 <p class="note">Мы не покупаем алкоголь и не принимаем бутылки: по вопросам продажи обращайтесь напрямую в выбранную компанию.</p>
+{expert_block()}
 """
     return simple_page(f"Контакты — {SITE}", "Как связаться с редакцией рейтинга скупок алкоголя: реквизиты оператора, e-mail и страница для организаций.",
                        "kontakty.html", "Контакты", "Как связаться с редакцией.", body, eyebrow="Связь")
@@ -1948,6 +1986,7 @@ def editorial_page():
         money = f"<p>{ph('name', 'опишите, получает ли сайт вознаграждение от компаний; если да — размещение является рекламой и требует маркировки')}</p>"
     body = f"""
 <p class="note-draft">Редакция от {POLICY_DATE}. Рабочий шаблон: проверьте, что описанные процессы соответствуют действительности, и согласуйте текст с юристом.</p>
+{expert_block()}
 <h2>1. Принципы</h2>
 <ul>
 <li>Компании сравниваются по одним и тем же открытым данным и одним правилам.</li>

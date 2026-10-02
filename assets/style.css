@@ -339,3 +339,12 @@ body.age-lock{overflow:hidden}
 .header-cta{white-space:nowrap}
 @media(max-width:1380px){.header-cta{display:none}}
 @media(max-width:1180px){.nav-links a{font-size:15px}}
+/* автор и эксперт */
+.expert{padding:10px 0 30px}
+.ex-card{display:flex;gap:26px;align-items:center;max-width:900px;margin:26px 0;padding:26px;border:1px solid var(--line);border-radius:20px;background:#fff}
+.ex-photo{width:160px;height:160px;flex:none;border-radius:50%;object-fit:cover}
+.ex-name{margin:8px 0 4px;color:var(--burgundy);font-family:"Cormorant Garamond",serif;font-size:36px;font-weight:700;line-height:1}
+.ex-role{margin-bottom:10px;color:var(--gold-d);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.ex-card p{color:var(--muted);font-size:14px;line-height:1.65}
+.ex-disc{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-size:13px}
+@media(max-width:700px){.ex-card{flex-direction:column;align-items:flex-start}}
