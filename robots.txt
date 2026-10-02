@@ -48,5 +48,6 @@ User-agent: *
 Allow: /
 Disallow: /standalone/
 Disallow: /tools/
+Disallow: /includes/
 
 Sitemap: https://valura.example/sitemap.xml

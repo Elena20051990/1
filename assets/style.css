@@ -333,3 +333,9 @@ body.age-lock{overflow:hidden}
 .legal strong{display:inline-grid;place-items:center;min-width:34px;height:34px;margin-right:8px;border:2px solid var(--gold);border-radius:50%;color:var(--gold);font-size:12px}
 .footer-main{grid-template-columns:1.3fr 1fr 1fr 1.1fr}
 @media(max-width:850px){.footer-main{grid-template-columns:1fr 1fr}.header-inner .age-badge{margin-left:0}}
+/* шапка: восемь пунктов в одну строку */
+.nav-links{gap:18px}
+.nav-links a{white-space:nowrap;font-size:13.5px}
+.header-cta{white-space:nowrap}
+@media(max-width:1380px){.header-cta{display:none}}
+@media(max-width:1180px){.nav-links a{font-size:15px}}
