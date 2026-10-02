@@ -352,10 +352,10 @@ body.age-lock{overflow:hidden}
 .expert-note{margin-top:18px;padding:12px 16px;border-left:3px solid var(--gold);border-radius:6px;background:#f6efe0;color:#5d4a26;font-size:13px;line-height:1.6}
 .expert-note a{font-weight:700;text-decoration:underline}
 
-.nav-logo img{display:block;height:58px;width:auto}
+.nav-logo img{display:block;height:60px;width:auto}
 .footer-brand{display:inline-block;padding:10px 14px;background:#fff;border-radius:8px}
-.footer-brand img{height:56px;width:auto;display:block}
-@media(max-width:700px){.nav-logo img{height:44px}}
+.footer-brand img{height:64px;width:auto;display:block}
+@media(max-width:700px){.nav-logo img{height:48px}}
 .keyfacts{padding:34px 0 40px}
 .keyfacts .sub{margin-bottom:12px;font-size:26px}
 .keyfacts .goals{display:block;margin:0;padding:6px 20px;border:1px solid var(--line);border-radius:12px;background:#fff;list-style:none}

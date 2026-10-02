@@ -390,7 +390,7 @@ def header_inline(depth=0, base=None):
     links = "\n".join(f'<a href="{home if h == "" else (home + h if h.startswith("#") else p + h)}">{e(l)}</a>' for l, h in NAV)
     return f"""<header class="header" id="header">
 <div class="container header-inner">
-<a href="{home}" class="nav-logo" aria-label="{SITE} — главная"><img src="{p}assets/logo.png" alt="{SITE}" width="140" height="68"></a>
+<a href="{home}" class="nav-logo" aria-label="{SITE} — главная"><img src="{p}assets/logo.png" alt="{SITE}" width="140" height="74"></a>
 <span class="age-badge" title="Сайт для лиц старше 18 лет">18+</span>
 <nav class="nav-links" id="navLinks" aria-label="Главная навигация">
 {links}
@@ -485,7 +485,7 @@ def footer_inline(depth=0, base=None):
 <div class="container">
 <div class="footer-main">
 <div>
-<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img src="{home}assets/logo.png" alt="{SITE}" width="160" height="77"></a>
+<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img src="{home}assets/logo.png" alt="{SITE}" width="160" height="85"></a>
 <p class="footer-logo-copy">Где продать алкоголь в Москве и Московской области: рейтинг скупок коньяка, виски, вина, шампанского, рома и арманьяка. Оценка бутылок, цены выкупа, условия сделки.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
