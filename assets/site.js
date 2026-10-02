@@ -58,13 +58,39 @@
         .catch(function () { msg.textContent = 'Не удалось отправить отзыв. Попробуйте позже.'; });
     });
   }
+  // Подтверждение возраста (18+): окно показывается при первом визите, ответ запоминается
+  var gate = document.getElementById('ageGate'), gateActive = false;
+  function ageOk() {
+    var ok = false;
+    try { ok = localStorage.getItem('age_confirmed') === '1'; } catch (e) {}
+    return ok || /(?:^|; )age_confirmed=1/.test(document.cookie);
+  }
+  if (gate && !ageOk()) {
+    gateActive = true;
+    gate.hidden = false;
+    document.body.classList.add('age-lock');
+    document.getElementById('ageYes').addEventListener('click', function () {
+      try { localStorage.setItem('age_confirmed', '1'); } catch (e) {}
+      document.cookie = 'age_confirmed=1; max-age=31536000; path=/; SameSite=Lax';
+      gate.hidden = true;
+      document.body.classList.remove('age-lock');
+      var cb = document.getElementById('cookieBar');
+      if (cb && cb.dataset.need === '1') cb.hidden = false;
+    });
+    document.getElementById('ageNo').addEventListener('click', function () {
+      document.getElementById('ageMsg').textContent = 'Доступ к сайту ограничен: он предназначен для лиц старше 18 лет.';
+      document.getElementById('ageYes').hidden = true;
+      document.getElementById('ageNo').hidden = true;
+    });
+  }
   // Согласие на cookie: после нажатия плашка скрывается и больше не показывается
   var bar = document.getElementById('cookieBar');
   if (bar) {
     var accepted = false;
     try { accepted = localStorage.getItem('cookie_consent') === '1'; } catch (e) {}
     if (!accepted) accepted = /(?:^|; )cookie_consent=1/.test(document.cookie);
-    if (!accepted) bar.hidden = false;
+    bar.dataset.need = accepted ? '' : '1';
+    if (!accepted && !gateActive) bar.hidden = false;
     document.getElementById('cookieOk').addEventListener('click', function () {
       try { localStorage.setItem('cookie_consent', '1'); } catch (e) {}
       document.cookie = 'cookie_consent=1; max-age=31536000; path=/; SameSite=Lax';
