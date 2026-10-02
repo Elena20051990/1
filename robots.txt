@@ -50,4 +50,4 @@ Disallow: /standalone/
 Disallow: /tools/
 Disallow: /includes/
 
-Sitemap: https://valura.example/sitemap.xml
+Sitemap: https://alcorating.ru/sitemap.xml

@@ -14,14 +14,14 @@ TXT = (ROOT / "tools" / "niche.txt").read_text(encoding="utf-8")
 LINES = [html.unescape(l).rstrip() for l in TXT.split("\n")]
 
 # ---- Настройки, которые нужно заполнить перед запуском -------------------------------------------
-SITE_URL = "https://valura.example"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
+SITE_URL = "https://alcorating.ru"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
 OPERATOR = dict(                      # оператор персональных данных (подставляется в политики и на страницу «Для компаний»)
     name="Александр Викторович Воронцов",      # ФИО или название организации/ИП
     inn="",       # необязательно: если пусто — ИНН нигде не показывается
     address="",   # необязательно: если пусто — адрес нигде не показывается
-    email="",     # e-mail для обращений
+    email="admin@alcorating.ru",     # e-mail для обращений
     phone="",     # необязательно: показывается только если заполнено
-    telegram="",  # Telegram редакции, например @valura_rating
+    telegram="",  # Telegram редакции, например @alcorating
 )
 # Как подключать шапку и подвал: "inline" — блок вставляется в каждую страницу при сборке (работает на любом хостинге);
 # "ssi" — на страницах стоит директива <!--#include virtual="/includes/header.html" --> (нужна поддержка SSI на сервере и размещение в корне домена).
@@ -52,7 +52,7 @@ BUILD_DATE = "2026-10-01"             # дата для sitemap (lastmod)
 POLICY_DATE = "1 октября 2026 г."
 # --------------------------------------------------------------------------------------------------
 
-SITE = "ВАЛЮРА"
+SITE = "АЛКОРЕЙТИНГ"
 SITE_SUB = "Скупка алкоголя · рейтинг"
 UPDATED = "30 сентября 2026"
 e = html.escape
@@ -345,7 +345,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <meta name="theme-color" content="#431f2a">
 <link rel="canonical" href="{url}">
 {verify}<link rel="alternate" type="application/json" href="{SITE_URL}/data/companies.json" title="Данные рейтинга (JSON)">
-<link rel="icon" href="{p}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{p}assets/favicon.png" type="image/png">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ru_RU">
 <meta property="og:site_name" content="{SITE}">
@@ -388,7 +388,7 @@ def header_inline(depth=0, base=None):
     links = "\n".join(f'<a href="{home if h == "" else (home + h if h.startswith("#") else p + h)}">{e(l)}</a>' for l, h in NAV)
     return f"""<header class="header" id="header">
 <div class="container header-inner">
-<a href="{home}" class="nav-logo" aria-label="{SITE} — главная">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
+<a href="{home}" class="nav-logo" aria-label="{SITE} — главная"><img src="{p}assets/logo.png" alt="{SITE}" width="140" height="68"></a>
 <span class="age-badge" title="Сайт для лиц старше 18 лет">18+</span>
 <nav class="nav-links" id="navLinks" aria-label="Главная навигация">
 {links}
@@ -483,7 +483,7 @@ def footer_inline(depth=0, base=None):
 <div class="container">
 <div class="footer-main">
 <div>
-<a href="{home}" class="nav-logo">{SITE}<span class="nav-logo-sub">{SITE_SUB}</span></a>
+<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img src="{home}assets/logo.png" alt="{SITE}" width="160" height="77"></a>
 <p class="footer-logo-copy">Где продать алкоголь в Москве и Московской области: рейтинг скупок коньяка, виски, вина, шампанского, рома и арманьяка. Оценка бутылок, цены выкупа, условия сделки.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
