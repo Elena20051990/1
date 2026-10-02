@@ -862,6 +862,7 @@ def index_page():
 </section>
 
 {key_facts(CARDS)}
+<section class="photo-band"><div class="container"><span class="eyebrow">Независимый рейтинг</span><p>Места не продаются: оценки считаются по открытой методике, а размещение в рейтинге бесплатное.</p></div></section>
 <section class="section ranking-section" id="ranking">
 <div class="container">
 <div class="section-top">
