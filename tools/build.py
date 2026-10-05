@@ -1311,7 +1311,17 @@ def speed_score(i):
     return min(5, max(1, s))
 
 
+# Оценки, заданные редакцией вручную (итог — среднее трёх параметров)
+SCORE_OVERRIDE = {
+    "room-alco.ru":    {"price": 4.5, "speed": 4.5, "trust": 4.8},    # итог 4.6
+    "diamant-alko.ru": {"price": 4.5, "speed": 4.5, "trust": 4.5},    # итог 4.5
+}
+
+
 def scores(c):
+    if c["domain"] in SCORE_OVERRIDE:
+        p = dict(SCORE_OVERRIDE[c["domain"]])
+        return p, round(sum(p.values()) / 3, 1)
     i = SCORE_INPUT[c["domain"]]
     p = {"price": PRICE_SCORE[i["price"]], "speed": speed_score(i), "trust": max(1, sum(i["checks"]))}
     total = round(sum(p.values()) / 3, 1)

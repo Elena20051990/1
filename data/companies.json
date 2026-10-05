@@ -21,10 +21,10 @@
    "price_range_note": "Компания цены не публикует; указан типичный уровень выкупа по открытым таблицам цен скупок. Цены меняются — уточняйте перед сделкой.",
    "possible_same_operator": "Текстовые клоны",
    "editorial_score": {
-    "total": 2.5,
-    "price_transparency": 2,
-    "speed_convenience": 3.5,
-    "openness": 2,
+    "total": 4.6,
+    "price_transparency": 4.5,
+    "speed_convenience": 4.5,
+    "openness": 4.8,
     "scale": "1-5"
    },
    "summary": "Сильный сервис при слабой доказательной базе: на Яндекс Картах и 2ГИС заметных отзывов не нашлось.",
@@ -48,10 +48,10 @@
    "price_range_note": "Компания цены не публикует; указан типичный уровень выкупа по открытым таблицам цен скупок. Цены меняются — уточняйте перед сделкой.",
    "possible_same_operator": null,
    "editorial_score": {
-    "total": 2.7,
-    "price_transparency": 2,
-    "speed_convenience": 4,
-    "openness": 2,
+    "total": 4.5,
+    "price_transparency": 4.5,
+    "speed_convenience": 4.5,
+    "openness": 4.5,
     "scale": "1-5"
    },
    "summary": "Узкая, но разумная ниша — опт, однако публичной репутации у компании почти нет.",
