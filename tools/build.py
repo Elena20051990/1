@@ -343,7 +343,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
-<meta name="robots" content="{ROBOTS_META}">
+<meta name="robots" content="{"noindex, follow" if path in NOINDEX_PAGES else ROBOTS_META}">
 <meta name="theme-color" content="#431f2a">
 <link rel="canonical" href="{url}">
 {verify}<link rel="alternate" type="application/json" href="{SITE_URL}/data/companies.json" title="Данные рейтинга (JSON)">
@@ -1747,7 +1747,7 @@ def topic_cross(cur_key, depth):
     write_data_files()
     write_llms_txt()
     write_includes()
-    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("kontakty.html", "0.4"), ("redakcionnaya-politika.html", "0.3"), ("otkaz-ot-otvetstvennosti.html", "0.2"), ("pravila-polzovaniya.html", "0.2"), ("politika-konfidencialnosti.html", "0.2"), ("politika-cookie.html", "0.2")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
+    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("kontakty.html", "0.4"), ("redakcionnaya-politika.html", "0.3")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
     write_seo_files(sm)
     for tp in TOPICS:
         if tp["key"] != cur_key:
@@ -2095,6 +2095,8 @@ def terms_page():
 
 
 ROBOTS_META = "index, follow, max-image-preview:large" if ALLOW_INDEXING else "noindex, nofollow, noarchive"
+# Служебные юридические страницы: не индексируются (ссылки с них поисковики обходят), в sitemap не попадают
+NOINDEX_PAGES = {"politika-konfidencialnosti.html", "politika-cookie.html", "otkaz-ot-otvetstvennosti.html", "pravila-polzovaniya.html"}
 
 
 def write_seo_files(pages):
