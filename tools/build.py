@@ -28,7 +28,7 @@ OPERATOR = dict(                      # оператор персональны�
 # Файлы includes/header.html и includes/footer.html создаются при любом режиме.
 INCLUDE_MODE = "inline"
 # Индексация: False — сайт закрыт (meta noindex, robots.txt Disallow: /, заголовок X-Robots-Tag через .htaccess). Для открытия поставьте True и пересоберите.
-ALLOW_INDEXING = False
+ALLOW_INDEXING = True
 
 # Автор и эксперт сайта. Блок показывается только при show=True и только когда вы подтвердили реальные сведения:
 # имя и фото используются с согласия человека, должность и квалификация подтверждаются документами.
@@ -2107,7 +2107,7 @@ def write_seo_files(pages):
         return
     (ROOT / ".htaccess").unlink(missing_ok=True)
     bots = "".join(f"User-agent: {b}\nAllow: /\n\n" for b in AI_BOTS)
-    (ROOT / "robots.txt").write_text(f"# Поисковые и ИИ-краулеры допускаются явно; служебные папки закрыты для всех\n{bots}User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\nDisallow: /includes/\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
+    (ROOT / "robots.txt").write_text(f"# Поисковые и ИИ-краулеры допускаются явно; служебные папки закрыты для всех\n{bots}User-agent: *\nAllow: /\nDisallow: /standalone/\nDisallow: /tools/\nDisallow: /includes/\nDisallow: /send.php\n\nSitemap: {SITE_URL}/sitemap.xml\n", encoding="utf-8")
 
 
 # Фото-полосы между текстовыми блоками: (файл страницы) -> [(id секции, перед которой вставить, картинка, подпись, текст, ссылка, текст кнопки)]
