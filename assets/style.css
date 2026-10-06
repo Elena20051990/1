@@ -393,3 +393,4 @@ body.age-lock{overflow:hidden}
 .top-list li a{flex:1;min-width:0}
 .visit{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:6px 0 22px}
 .visit-domain{color:var(--muted-2,#8a7f78);font-size:14px}
+.detail-text{margin:8px 0 28px}
