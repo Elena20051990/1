@@ -324,6 +324,10 @@ def review_ld(c):
             "name": f"{c['name']}: оценка редакции", "reviewBody": f"{r['lead']} {r['verdict']}", "inLanguage": "ru"}
 
 
+import hashlib
+# версия ресурсов в адресе: после правки стилей браузеры и кэш хостинга подтянут свежие файлы
+ASSET_V = hashlib.md5(((ROOT / "assets" / "style.css").read_bytes() + (ROOT / "assets" / "site.js").read_bytes())).hexdigest()[:8]
+
 YM_SCRIPT = """<!-- Yandex.Metrika counter -->
 <script type="text/javascript">
     (function(m,e,t,r,i,k,a){
@@ -381,7 +385,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{p}assets/style.css">
+<link rel="stylesheet" href="{p}assets/style.css?v={ASSET_V}">
 {jsonld(site_ld, org, page_ld, *(ld or []))}
 {YM_SCRIPT.replace("__ID__", YM_ID) if YM_ID else ""}</head>
 <body>
@@ -527,7 +531,7 @@ def footer_inline(depth=0, base=None):
 <button class="btn btn-primary" type="button" id="cookieOk">Согласен</button>
 </div>
 {age_gate_html()}
-<script src="{p}assets/site.js"></script>
+<script src="{p}assets/site.js?v={ASSET_V}"></script>
 </body>
 </html>
 """
