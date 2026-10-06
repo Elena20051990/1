@@ -387,3 +387,7 @@ body.age-lock{overflow:hidden}
 .cc-name{display:flex;align-items:center;gap:16px}
 .cc-name::before{content:counter(cc);flex:none;display:grid;place-items:center;width:46px;height:46px;padding:0;border-radius:50%;background:var(--burgundy);color:#fff;font-family:"Open Sans",sans-serif;font-size:18px;font-weight:700;line-height:1}
 @media(max-width:850px){.cc-name::before{width:38px;height:38px;font-size:16px}}
+.top-list{counter-reset:t}
+.top-list li{counter-increment:t;display:flex;align-items:center;gap:12px}
+.top-list li::before{content:counter(t);flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--burgundy);color:#fff;font-family:"Open Sans",sans-serif;font-size:13px;font-weight:700;line-height:1}
+.top-list li a{flex:1;min-width:0}
