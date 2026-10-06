@@ -1407,10 +1407,6 @@ def company_page(c, i):
     rel_site = "nofollow noopener"
     note = f'<p class="visit"><a class="btn btn-primary" href="https://{e(c["domain"])}" target="_blank" rel="{rel_site}">Перейти на сайт {e(c["domain"])} <span class="arrow">→</span></a></p>'
     warn = ""
-    if c["cluster"]:
-        mates = [d for n, m in CLUSTERS if c["domain"] in m for d in m if d != c["domain"]]
-        mate_links = ", ".join('<a class="text-link" href="https://%s" target="_blank" rel="nofollow noopener">%s</a>' % (e(d), e(d)) for d in mates)
-        warn = f'<p class="callout">Возможно, один оператор: {e(c["cluster"])} (сайты: {mate_links}). Это признаки по шаблонам и контактам, а не доказательство.</p>'
     own = ""
     rel = "sponsored noopener" if c["own"] else "nofollow noopener"
     nav = ""
