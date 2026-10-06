@@ -1404,11 +1404,13 @@ def company_page(c, i):
     prev_c, next_c = CARDS[i - 1] if i else None, CARDS[i + 1] if i + 1 < len(CARDS) else None
     pros = "".join(f"<li>{e(x)}</li>" for x in c["pros"])
     cons = "".join(f"<li>{e(x)}</li>" for x in c["cons"])
-    note = f'<p class="muted">{e(c["note"])}</p>' if c["note"] else ""
+    rel_site = "nofollow noopener"
+    note = f'<p class="visit"><a class="btn btn-primary" href="https://{e(c["domain"])}" target="_blank" rel="{rel_site}">Перейти на сайт <span class="arrow">→</span></a><span class="visit-domain">{e(c["domain"])}</span></p>'
     warn = ""
     if c["cluster"]:
         mates = [d for n, m in CLUSTERS if c["domain"] in m for d in m if d != c["domain"]]
-        warn = f'<p class="callout">Возможно, один оператор: {e(c["cluster"])} (сайты: {", ".join(e(d) for d in mates)}). Это признаки по шаблонам и контактам, а не доказательство.</p>'
+        mate_links = ", ".join('<a class="text-link" href="https://%s" target="_blank" rel="nofollow noopener">%s</a>' % (e(d), e(d)) for d in mates)
+        warn = f'<p class="callout">Возможно, один оператор: {e(c["cluster"])} (сайты: {mate_links}). Это признаки по шаблонам и контактам, а не доказательство.</p>'
     own = ""
     rel = "sponsored noopener" if c["own"] else "nofollow noopener"
     nav = ""

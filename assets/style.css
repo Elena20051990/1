@@ -391,3 +391,5 @@ body.age-lock{overflow:hidden}
 .top-list li{counter-increment:t;display:flex;align-items:center;gap:12px}
 .top-list li::before{content:counter(t);flex:none;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--burgundy);color:#fff;font-family:"Open Sans",sans-serif;font-size:13px;font-weight:700;line-height:1}
 .top-list li a{flex:1;min-width:0}
+.visit{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:6px 0 22px}
+.visit-domain{color:var(--muted-2,#8a7f78);font-size:14px}
