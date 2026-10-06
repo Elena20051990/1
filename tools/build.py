@@ -112,7 +112,7 @@ CLUSTERS = [
     ("Кластер Cupaj Club", ["cupajclub.ru", "alkoprikup.ru"]),
     ("Текстовые клоны", ["room-alco.ru", "skup-alco.ru", "kupimalko.ru"]),
 ]
-OWN = {"room-alco.ru", "diamant-alko.ru"}  # места 1–2 заданы владельцем сайта
+OWN = set()  # компании, связанные с владельцем сайта (если такие есть, их нужно раскрыть на сайте)
 
 
 def parse_cards():
@@ -1230,7 +1230,7 @@ def summary_section():
         ("Честный дисконт", "Рынок и потолок рядом показывает одна компания: ≈28–33%."),
         ("Гарантия «цена по фото = цена на встрече»", "1buyup, VykupAlko, Kupimalko, TotalStok (заявления, не аудит)."),
         ("Вероятные группы сайтов", "700ml + Alko Lombard + oldcognac; Red Decanter + SKUPKA-ALKOGOL; Cupaj Club + Alko Prikup."),
-        ("Room Alco / Diamant Alko", "Услуги шире рынка, но независимой репутации и прайса нет."),
+        ("Diamant Alko / Room Alco", "Услуги шире рынка, но независимой репутации и прайса нет."),
     ]
     body = "".join(f"<tr><td><strong>{e(a)}</strong></td><td>{e(b)}</td></tr>" for a, b in rows)
     return f"""<section class="section ranking-section" id="summary">
@@ -1334,8 +1334,8 @@ def speed_score(i):
 
 # Оценки, заданные редакцией вручную (итог — среднее трёх параметров)
 SCORE_OVERRIDE = {
-    "room-alco.ru":    {"price": 4.5, "speed": 4.5, "trust": 4.8},    # итог 4.6
-    "diamant-alko.ru": {"price": 4.5, "speed": 4.5, "trust": 4.5},    # итог 4.5
+    "diamant-alko.ru": {"price": 4.5, "speed": 4.5, "trust": 4.8},    # итог 4.6 (временные значения до оценок эксперта)
+    "room-alco.ru":    {"price": 4.5, "speed": 4.5, "trust": 4.5},    # итог 4.5
 }
 
 
