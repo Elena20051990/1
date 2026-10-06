@@ -1405,7 +1405,7 @@ def company_page(c, i):
     pros = "".join(f"<li>{e(x)}</li>" for x in c["pros"])
     cons = "".join(f"<li>{e(x)}</li>" for x in c["cons"])
     rel_site = "nofollow noopener"
-    note = f'<p class="visit"><a class="btn btn-primary" href="https://{e(c["domain"])}" target="_blank" rel="{rel_site}">Перейти на сайт <span class="arrow">→</span></a><span class="visit-domain">{e(c["domain"])}</span></p>'
+    note = f'<p class="visit"><a class="btn btn-primary" href="https://{e(c["domain"])}" target="_blank" rel="{rel_site}">Перейти на сайт {e(c["domain"])} <span class="arrow">→</span></a></p>'
     warn = ""
     if c["cluster"]:
         mates = [d for n, m in CLUSTERS if c["domain"] in m for d in m if d != c["domain"]]
