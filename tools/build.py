@@ -485,6 +485,20 @@ def contact_line():
     return f"<p>Связаться с редакцией: {', '.join(parts)}.</p>" if parts else ""
 
 
+def footer_contacts():
+    """Блок «Контакты» в подвале: e-mail (и телефон, Telegram, если заданы) крупно и со ссылкой."""
+    items = []
+    if OPERATOR.get("email"):
+        items.append(f'<a class="footer-mail" href="mailto:{e(OPERATOR["email"])}">{e(OPERATOR["email"])}</a>')
+    if OPERATOR.get("phone"):
+        items.append(f'<a class="footer-mail" href="tel:{e(re.sub(r"[^+0-9]", "", OPERATOR["phone"]))}">{e(OPERATOR["phone"])}</a>')
+    if OPERATOR.get("telegram"):
+        items.append(f'<a class="footer-mail" href="https://t.me/{e(OPERATOR["telegram"].lstrip("@"))}">Telegram {e(OPERATOR["telegram"])}</a>')
+    if not items:
+        return ""
+    return '<h3 class="footer-title footer-title-next">Контакты</h3><div class="footer-links">' + "".join(items) + '</div>'
+
+
 def age_gate_html():
     if not AGE_GATE:
         return ""
@@ -516,13 +530,12 @@ def footer_inline(depth=0, base=None):
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
 <a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}kontakty.html">Контакты</a></div></div>
 <div><h3 class="footer-title">Документы</h3><div class="footer-links">
-<a href="{p}redakcionnaya-politika.html">Редакционная политика</a><a href="{p}otkaz-ot-otvetstvennosti.html">Отказ от ответственности</a><a href="{p}pravila-polzovaniya.html">Правила пользования</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div></div>
+<a href="{p}redakcionnaya-politika.html">Редакционная политика</a><a href="{p}otkaz-ot-otvetstvennosti.html">Отказ от ответственности</a><a href="{p}pravila-polzovaniya.html">Правила пользования</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div>{footer_contacts()}</div>
 </div>
 <div class="legal">
 <p><strong>18+</strong> Сайт содержит информацию об алкогольной продукции и предназначен для лиц старше 18 лет. Чрезмерное употребление алкоголя вредит вашему здоровью. Продажа алкоголя лицам младше 18 лет запрещена.</p>
 <p>Сайт не оказывает и не продаёт услуги, не продаёт алкоголь и не принимает его от пользователей. Вся информация носит исключительно информационный характер, может быть устаревшей и не является публичной офертой. Цены и сроки — заявления компаний; точную информацию уточняйте на сайтах компаний. Рейтинг составлен по открытым данным из разных источников, порядок его составления описан в <a href="{p}metodika.html">методике</a> и <a href="{p}redakcionnaya-politika.html">редакционной политике</a>.</p>
 <p>{op}.</p>
-{contact_line()}
 </div>
 <div class="footer-bottom"><p>© 2026 {SITE}. Информация носит справочный характер.</p><p>Данные актуальны на {UPDATED}</p></div>
 </div>

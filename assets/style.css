@@ -331,3 +331,7 @@ body.age-lock{overflow:hidden}
 .fb-form .btn-primary:hover{background:#000}
 .fb-msg{min-height:1.2em;color:var(--muted);font-size:13px}
 @media(max-width:960px){.final-grid{grid-template-columns:1fr;gap:32px}}
+
+.footer-title-next{margin-top:28px}
+.footer .footer-links a.footer-mail{color:#fff;font-size:16px;font-weight:800;text-decoration:underline;text-decoration-color:#ff8a77;text-underline-offset:4px;overflow-wrap:anywhere}
+.footer .footer-links a.footer-mail:hover{color:#ff8a77}
