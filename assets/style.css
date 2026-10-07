@@ -320,11 +320,3 @@ body.age-lock{overflow:hidden}
 .photo-band{padding:40px 0}
 }
 @media(max-width:600px){.cookie-bar{flex-direction:column;align-items:stretch;gap:12px}.trust-grid{grid-template-columns:1fr}.ex-card{flex-direction:column;align-items:flex-start}}
-
-/* верхняя полоса и «как продать» (шапка и подвал подключаются через include) */
-.topbar{background:var(--ink);color:#e9e5db;font-size:12.5px;line-height:1.4}
-.topbar .container{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:36px;padding-block:6px}
-.topbar p{margin:0}.topbar strong{color:#fff}
-.topbar a{flex:none;color:#ff8a77;font-weight:700;letter-spacing:.04em;white-space:nowrap}
-.topbar a:hover{color:#fff}
-@media(max-width:850px){.topbar a{display:none}.topbar{font-size:11.5px}}

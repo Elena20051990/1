@@ -410,8 +410,7 @@ def header_inline(depth=0, base=None):
     p = base if base else "../" * depth
     home = base if base else (p or "./")
     links = "\n".join(f'<a href="{home if h == "" else (home + h if h.startswith("#") else p + h)}">{e(l)}</a>' for l, h in NAV)
-    return f"""<div class="topbar"><div class="container"><p><strong>Скупка алкоголя в Москве и Московской области.</strong> Сравните, где выгодно продать коньяк, виски, вино и шампанское: онлайн-оценка по фото, выезд, быстро и без лишних условий.</p><a href="{home}#ranking">Смотреть рейтинг →</a></div></div>
-<header class="header" id="header">
+    return f"""<header class="header" id="header">
 <div class="container header-inner">
 <a href="{home}" class="nav-logo" aria-label="{SITE} — главная"><span>ГРАДУС<i>.</i></span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></a>
 <span class="age-badge" title="Сайт для лиц старше 18 лет">18+</span>
