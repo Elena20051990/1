@@ -528,7 +528,7 @@ def footer_inline(depth=0, base=None):
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
 <a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Элитное вино</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#faq">Вопросы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
-<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}kontakty.html">Контакты</a></div></div>
+<a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}kontakty.html">Контакты</a><a href="{p}karta-sayta.html">Карта сайта</a></div></div>
 <div><h3 class="footer-title">Документы</h3><div class="footer-links">
 <a href="{p}redakcionnaya-politika.html">Редакционная политика</a><a href="{p}otkaz-ot-otvetstvennosti.html">Отказ от ответственности</a><a href="{p}pravila-polzovaniya.html">Правила пользования</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div>{footer_contacts()}</div>
 </div>
@@ -1858,13 +1858,14 @@ def topic_cross(cur_key, depth):
     (ROOT / "politika-cookie.html").write_text(cookie_page(), encoding="utf-8")
     (ROOT / "dlya-kompanii.html").write_text(company_page_for_orgs(), encoding="utf-8")
     (ROOT / "kontakty.html").write_text(contacts_page(), encoding="utf-8")
+    (ROOT / "karta-sayta.html").write_text(sitemap_page(), encoding="utf-8")
     (ROOT / "redakcionnaya-politika.html").write_text(editorial_page(), encoding="utf-8")
     (ROOT / "otkaz-ot-otvetstvennosti.html").write_text(disclaimer_page(), encoding="utf-8")
     (ROOT / "pravila-polzovaniya.html").write_text(terms_page(), encoding="utf-8")
     write_data_files()
     write_llms_txt()
     write_includes()
-    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("kontakty.html", "0.4"), ("redakcionnaya-politika.html", "0.3")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
+    sm = [("", "1.0")] + [(tp["file"], "0.9") for tp in TOPICS] + [("prices.html", "0.8"), ("metodika.html", "0.7"), ("o-reitinge.html", "0.5"), ("dlya-kompanii.html", "0.4"), ("kontakty.html", "0.4"), ("karta-sayta.html", "0.3"), ("redakcionnaya-politika.html", "0.3")] + [(f"c/{c['slug']}.html", "0.7") for c in CARDS]
     write_seo_files(sm)
     for tp in TOPICS:
         if tp["key"] != cur_key:
@@ -1933,6 +1934,21 @@ def simple_page(title, desc, path, h1, lead, body, eyebrow="Документ"):
 </section>
 </main>
 """ + footer()
+
+
+def sitemap_page():
+    """Карта сайта для посетителей (HTML)."""
+    def ul(items):
+        return '<ul class="sitemap-list">' + "".join(f'<li><a href="{h}">{e(t)}</a></li>' for h, t in items) + "</ul>"
+    main_pages = [("./", "Главная: рейтинг скупок алкоголя в Москве")] + [(tp["file"], tp["h1"].rstrip("?")) for tp in TOPICS] + [("prices.html", "Цены выкупа алкоголя в Москве")]
+    companies = [(f"c/{c['slug']}.html", c["name"]) for c in CARDS]
+    info = [("metodika.html", "Методика составления рейтинга"), ("o-reitinge.html", "О рейтинге и эксперте"), ("dlya-kompanii.html", "Для организаций: исправить данные"), ("kontakty.html", "Контакты")]
+    docs = [("redakcionnaya-politika.html", "Редакционная политика"), ("otkaz-ot-otvetstvennosti.html", "Отказ от ответственности"), ("pravila-polzovaniya.html", "Правила пользования"), ("politika-konfidencialnosti.html", "Политика конфиденциальности"), ("politika-cookie.html", "Политика cookie")]
+    body = f"""<div class="sitemap-grid">
+<div><h2>Разделы</h2>{ul(main_pages)}<h2>Информация</h2>{ul(info)}<h2>Документы</h2>{ul(docs)}</div>
+<div><h2>Компании рейтинга</h2>{ul(companies)}</div>
+</div>"""
+    return simple_page(f"Карта сайта — {SITE}", f"Карта сайта {SITE}: все разделы, страницы компаний рейтинга скупок алкоголя, информация и документы.", "karta-sayta.html", "Карта сайта", "Все страницы сайта: рейтинги, обзоры компаний, методика и документы.", body, eyebrow="Навигация")
 
 
 def privacy_page():

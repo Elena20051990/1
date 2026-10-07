@@ -340,3 +340,13 @@ body.age-lock{overflow:hidden}
 .crumbs a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
 .crumbs a:hover{color:var(--accent);text-decoration-color:var(--accent)}
 .crumbs [aria-current]{color:var(--muted)}
+
+/* карта сайта */
+.sitemap-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.sitemap-grid h2{margin:32px 0 12px;padding-bottom:10px;border-bottom:2px solid var(--ink);color:var(--ink);font-family:var(--serif);font-size:26px;font-weight:800}
+.sitemap-grid>div>h2:first-child{margin-top:0}
+.sitemap-list{display:grid;gap:0;list-style:none;margin:0}
+.sitemap-list li{border-bottom:1px solid var(--line)}
+.sitemap-list a{display:block;padding:10px 0;color:var(--ink);font-size:15px}
+.sitemap-list a:hover{color:var(--accent)}
+@media(max-width:850px){.sitemap-grid{grid-template-columns:1fr;gap:0}}
