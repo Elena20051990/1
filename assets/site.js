@@ -122,4 +122,18 @@
         .catch(function () { cm.textContent = 'Не удалось отправить обращение. Попробуйте позже или напишите на e-mail.'; });
     });
   }
+  // Обратная связь
+  var ff = document.getElementById('feedbackForm');
+  if (ff) {
+    var fm = document.getElementById('feedbackMsg');
+    ff.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var ep = ff.dataset.endpoint;
+      if (!ep) { fm.textContent = 'Форма ещё не подключена к серверу — сообщение не отправлено. Напишите на e-mail из подвала страницы.'; return; }
+      var data = Object.fromEntries(new FormData(ff));
+      fetch(ep, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+        .then(function (r) { if (!r.ok) throw 0; fm.textContent = 'Спасибо! Сообщение отправлено, мы ответим на e-mail.'; ff.reset(); })
+        .catch(function () { fm.textContent = 'Не удалось отправить сообщение. Попробуйте позже или напишите на e-mail из подвала.'; });
+    });
+  }
 })();

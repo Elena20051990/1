@@ -48,6 +48,7 @@ PLACEMENT_IS_FREE = True              # True — только если разм�
 AGE_GATE = True                       # окно «Вам исполнилось 18 лет?» при первом визите
 CLAIM_DAYS = 10                       # срок рассмотрения обращений организаций, рабочих дней (подтвердите, что успеваете)
 REVIEW_ENDPOINT = "/send.php?type=review"                  # куда отправлять отзывы читателей (JSON, POST); пусто — форма сообщает, что не подключена
+FEEDBACK_ENDPOINT = "/send.php?type=feedback"            # куда отправлять сообщения из формы обратной связи (JSON, POST)
 CLAIM_ENDPOINT = "/send.php?type=claim"                   # куда отправлять обращения организаций (JSON, POST)
 GOOGLE_VERIFY = ""                    # содержимое meta google-site-verification (Search Console)
 YANDEX_VERIFY = ""
@@ -748,6 +749,29 @@ def shared_blocks(depth=0):
 """
 
 
+def feedback_cta():
+    """Красный блок в конце страницы: форма обратной связи."""
+    return f"""<section class="final-cta" id="feedback">
+<div class="container final-grid">
+<div>
+<span class="eyebrow">Обратная связь</span>
+<h2 class="final-title">Остались<br>вопросы?</h2>
+<p class="final-copy">Напишите редакции: ответим на вопрос по рейтингу, проверим данные о компании или подскажем, как сделать фото бутылки для предварительной оценки. Консультация редакции бесплатна. Саму оценку и цену называет выбранная вами компания, обычно от нескольких минут до суток.</p>
+<p class="final-note">Предварительная оценка не является окончательной ценой сделки.</p>
+</div>
+<form class="fb-form" id="feedbackForm" data-endpoint="{e(FEEDBACK_ENDPOINT)}">
+<label class="lbl">Имя<input class="field" id="fbName" name="name" maxlength="80" autocomplete="name"></label>
+<label class="lbl">E-mail для ответа<input class="field" id="fbEmail" name="email" type="email" required maxlength="120" autocomplete="email"></label>
+<label class="lbl">Сообщение<textarea class="field" id="fbText" name="text" rows="4" required maxlength="2000"></textarea></label>
+<label class="check"><input type="checkbox" name="consent" required><span>Я согласен(на) на обработку персональных данных в соответствии с <a class="text-link" href="politika-konfidencialnosti.html">политикой конфиденциальности</a>.</span></label>
+<p class="fb-msg" id="feedbackMsg" role="status"></p>
+<button class="btn btn-primary" type="submit">Отправить <span class="arrow">→</span></button>
+</form>
+</div>
+</section>
+"""
+
+
 def independence_section():
     free = ("<p>Размещение компаний в рейтинге бесплатно. Мы не получаем вознаграждения от компаний за место в списке, оценку или текст обзора.</p>"
             if PLACEMENT_IS_FREE else
@@ -938,6 +962,7 @@ def index_page():
 </section>
 
 {topic_cross("index", 0)}
+{feedback_cta()}
 </main>
 """ + footer()
     return body
@@ -1871,6 +1896,7 @@ def topic_page(tp):
 {wine_guide() + wine_assess() + wine_more() + wine_deal() + wine_faq() if tp['key'] == 'wine' else elite_guide() + elite_notes() + elite_more() + elite_faq()}
 {shared_blocks()}
 {topic_cross(tp['key'], 0)}
+{feedback_cta()}
 </main>
 """ + footer()
 
@@ -2198,7 +2224,21 @@ def write_seo_files(pages):
 
 
 # Фото-полосы между текстовыми блоками: (файл страницы) -> [(id секции, перед которой вставить, картинка, подпись, текст, ссылка, текст кнопки)]
-BANDS = {}  # декоративные «ленты» с цитатами между блоками отключены: они дублировали соседние разделы
+# Контрастные вставки-цитаты между блоками (без кнопок и перелинковки): (id секции, перед которой вставить, картинка-класс, подпись, текст, —, —)
+BANDS = {
+    "index.html": [
+        ("calc", "banner2.jpg", "Прежде чем продавать", "Сравните не только цену, но и условия сделки: срок оценки, способ оплаты и выезд курьера.", "#choose", "Пять вопросов перед сделкой"),
+        ("prepare", "banner3.jpg", "Подготовка", "Коробка, документы и сохранность этикетки заметно влияют на итоговую цену выкупа.", "#prepare", "Как подготовить бутылку"),
+    ],
+    "gde-prodat-elitnyy-alkogol.html": [
+        ("topic", "banner2.jpg", "Редкие бутылки", "Для дорогих бутылок особенно важны подлинность, комплектность и условия хранения.", "#guide", "Что считается элитным"),
+        ("faq", "banner3.jpg", "Перед сделкой", "Сфотографируйте этикетку, пробку и уровень жидкости: так оценка пройдёт быстрее.", "#prepare", "Как подготовить бутылку"),
+    ],
+    "gde-prodat-elitnoe-vino.html": [
+        ("topic", "banner.jpg", "Вино", "Цена зависит от хозяйства, года урожая, формата и сохранности бутылки.", "#guide", "Какое вино ценится"),
+        ("faq", "banner2.jpg", "Перед сделкой", "Условия хранения, целая пробка и оригинальный ящик помогают сохранить стоимость вина.", "#assess", "Как оценивают вино"),
+    ],
+}
 
 
 def add_bands(page, key):
@@ -2210,8 +2250,7 @@ def add_bands(page, key):
         j = page.rfind("<section", 0, i)
         cls = img.split(".")[0].replace("banner", "band-")
         band = (f'<section class="photo-band {cls}"><div class="container">'
-                f'<span class="eyebrow">{e(eyebrow)}</span><p>{e(text)}</p>'
-                f'<a class="btn btn-primary" href="{href}">{e(label)} <span class="arrow">→</span></a></div></section>\n')
+                f'<span class="eyebrow">{e(eyebrow)}</span><p>{e(text)}</p></div></section>\n')
         page = page[:j] + band + page[j:]
     return page
 

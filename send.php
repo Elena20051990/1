@@ -29,6 +29,12 @@ if ($type === 'review') {
     if ($text === '' || f($d, 'rating', 2) === '') out(400, false);
     $subject = 'Отзыв: ' . f($d, 'company', 120);
     $body = "Компания: " . f($d, 'company', 120) . "\nИмя: " . f($d, 'name', 80) . "\nОценка: " . f($d, 'rating', 2) . "\n\n" . $text . "\n";
+} elseif ($type === 'feedback') {
+    $email = f($d, 'email', 120);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || f($d, 'text', 2000) === '' || empty($d['consent'])) out(400, false);
+    $replyTo = $email;
+    $subject = 'Обратная связь с сайта';
+    $body = "Имя: " . f($d, 'name', 80) . "\nE-mail: " . $email . "\nСогласие на обработку данных: да\n\n" . f($d, 'text', 2000) . "\n";
 } elseif ($type === 'claim') {
     $email = f($d, 'email', 120);
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || f($d, 'text', 3000) === '' || f($d, 'company', 120) === '') out(400, false);
