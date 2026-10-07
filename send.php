@@ -1,6 +1,6 @@
 <?php
 // Приём отзывов и обращений организаций: пересылает их на e-mail оператора. Ничего не сохраняет на сервере, кроме метки времени для ограничения частоты.
-const TO = 'admin@gradus-rating.ru';
+const TO = 'expert@gradus-rating.ru';
 const FROM = 'noreply@gradus-rating.ru';   // ящик на домене сайта (создайте его в панели хостинга, если ещё нет)
 
 header('Content-Type: application/json; charset=utf-8');
