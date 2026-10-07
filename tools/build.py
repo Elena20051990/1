@@ -2122,6 +2122,25 @@ AI_BOTS = ["GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-Searc
            "Google-Extended", "Applebot-Extended", "CCBot", "YandexBot", "YandexAdditional", "Googlebot", "Bingbot"]
 
 
+def add_crumbs(html, is_company):
+    """Видимые хлебные крошки: Главная / раздел / страница (на главной не нужны)."""
+    m = re.search(r"<h1[^>]*>(.*?)</h1>", html, flags=re.S)
+    if not m or "<main" not in html:
+        return html
+    title = re.sub(r"<[^>]+>", " ", m.group(1))
+    title = re.sub(r"\s+", " ", title).replace(" ?", "?").strip().rstrip("?")
+    html = re.sub(r'<nav class="crumbs"[^>]*>.*?</nav>\s*', "", html, count=1, flags=re.S)
+    p = "../" if is_company else ""
+    trail = f'<a href="{p or "./"}">Главная</a>'
+    if is_company:
+        trail += f' / <a href="{p}#ranking">Рейтинг скупок</a>'
+    trail += f" / <span aria-current=\"page\">{title}</span>"
+    crumbs = f'<nav class="crumbs" aria-label="Хлебные крошки">{trail}</nav>\n'
+    i = html.index("<main")
+    j = html.index('<span class="eyebrow">', i)
+    return html[:j] + crumbs + html[j:]
+
+
 def postprocess(html):
     """Семантика таблиц: scope у заголовков."""
     html = re.sub(r"(<thead>.*?</thead>)", lambda m: m.group(1).replace("<th>", '<th scope="col">'), html, flags=re.S)
@@ -2284,4 +2303,7 @@ def main():
 if __name__ == "__main__":
     main()
     for f in list(ROOT.glob("*.html")) + list((ROOT / "c").glob("*.html")):
-        f.write_text(postprocess(f.read_text(encoding="utf-8")), encoding="utf-8")
+        h = postprocess(f.read_text(encoding="utf-8"))
+        if f.name != "index.html":
+            h = add_crumbs(h, f.parent.name == "c")
+        f.write_text(h, encoding="utf-8")

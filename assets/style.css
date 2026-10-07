@@ -335,3 +335,8 @@ body.age-lock{overflow:hidden}
 .footer-title-next{margin-top:28px}
 .footer .footer-links a.footer-mail{color:#fff;font-size:16px;font-weight:800;text-decoration:underline;text-decoration-color:#ff8a77;text-underline-offset:4px;overflow-wrap:anywhere}
 .footer .footer-links a.footer-mail:hover{color:#ff8a77}
+
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;color:var(--muted);font-size:13px;letter-spacing:.02em}
+.crumbs a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.crumbs a:hover{color:var(--accent);text-decoration-color:var(--accent)}
+.crumbs [aria-current]{color:var(--muted)}
