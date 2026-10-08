@@ -1,0 +1,4 @@
+# Шапка и подвал подключаются директивами SSI (<!--#include virtual="/includes/..." -->)
+Options +Includes
+AddType text/html .html
+AddOutputFilter INCLUDES .html
