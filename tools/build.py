@@ -421,11 +421,7 @@ def header_inline(depth=0, base=None):
     p = base if base else "../" * depth
     home = base if base else (p or "./")
     links = "\n".join(f'<a href="{home if h == "" else (home + h if h.startswith("#") else p + h)}" title="{e(NAV_TITLES[h])}">{e(l)}</a>' for l, h in NAV)
-    return f"""<div class="topbar"><div class="container topbar-inner">
-<p class="topbar-text">Где выгодно продать коньяк, виски, вино и шампанское в Москве и области: фото, онлайн-оценка, выезд</p>
-<p class="topbar-contact">Телефон, Telegram и WhatsApp — в карточке каждой компании</p>
-</div></div>
-<header class="header" id="header">
+    return f"""<header class="header" id="header">
 <div class="container header-inner">
 <a href="{home}" class="nav-logo" aria-label="{SITE} — главная"><span>alco-critic<i>.ru</i></span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></a>
 <span class="age-badge" title="Сайт для лиц старше 18 лет">18+</span>
@@ -943,7 +939,6 @@ def index_page():
 <section class="hero">
 <div class="container hero-grid">
 <div class="hero-content">
-<span class="eyebrow">Независимый рейтинг · Москва</span>
 <h1 class="hero-title">Где можно продать<br><span class="lime">алкоголь в Москве?</span></h1>
 <p class="hero-copy">Рейтинг 20 скупок коллекционного виски, коньяка, вина и шампанского: кто открыто называет цену, как быстро оценивает по фото и на каких условиях приезжает за бутылками. Выбирайте компанию под свою задачу: скорость, цена или удобство.</p>
 <div class="hero-buttons">
@@ -953,11 +948,11 @@ def index_page():
 </div>
 <div class="market-card-wrap">
 <aside class="top-card" aria-label="Топ компаний">
-<h2 class="top-title"><span>ТОП</span> компаний</h2>
+<h2 class="top-title"><span>ТОП-10</span> компаний</h2>
 <ol class="top-list">
-{"".join(f'<li><a href="c/{c["slug"]}.html"><span class="tn">{e(c["name"])}</span><span class="tm">{e(c["meta"]["speed"])}</span></a></li>' for c in CARDS)}
+{"".join(f'<li><a href="c/{c["slug"]}.html"><span class="tn">{e(c["name"])}</span><span class="tm">{e(c["meta"]["speed"])}</span></a></li>' for c in CARDS[:10])}
 </ol>
-<a href="metodika.html" class="top-how">Как составлен список?</a>
+<a href="#ranking" class="top-all">Весь рейтинг: {len(CARDS)} компаний →</a> <a href="metodika.html" class="top-how">Как составлен список?</a>
 </aside>
 </div>
 </div>
