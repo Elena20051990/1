@@ -360,3 +360,4 @@ body.age-lock{overflow:hidden}
 .footer-tags-title{margin-right:6px;color:var(--ink);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .footer-tags a{padding:6px 14px;border:1px solid var(--rule);border-radius:999px;color:var(--muted);font-size:13px;transition:.2s}
 .footer-tags a:hover{border-color:var(--accent);color:var(--accent)}
+.ex-card p+p{margin-top:10px}
