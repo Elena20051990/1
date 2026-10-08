@@ -51,4 +51,4 @@ Disallow: /tools/
 Disallow: /includes/
 Disallow: /send.php
 
-Sitemap: https://gradus-rating.ru/sitemap.xml
+Sitemap: https://alco-critic.ru/sitemap.xml
