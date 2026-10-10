@@ -3,3 +3,7 @@
 - 09-order-awaiting-payment.png — заказ «Ожидает оплаты» с предупреждением про VPN
 - 10-payment-methods.png — «Выберите способ оплаты» (СБП / картой / другим способом)
 - 11-robokassa.png — страница оплаты Robokassa
+- 12-robokassa-methods.png — Robokassa: Яндекс Пэй / СБП / SberPay, срок оплаты
+- 13-profile-login.png — «Вход в профиль»
+- 14-support-telegram.png — чат поддержки в Telegram
+- (по желанию) заменить 01–07 на скриншоты со смартфона: каталог, Турция с номиналами 10/50/150/300 ₺, корзина с галочкой
