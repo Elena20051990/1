@@ -45,7 +45,7 @@ img{max-width:100%}
 /* hero */
 .hero{background:linear-gradient(180deg,#f4ede4 0,var(--paper) 100%)}
 .hero-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:64px;align-items:start;padding:72px 0 64px}
-.hero-title{margin:22px 0 0;color:var(--ink);font-size:clamp(40px,5.4vw,76px);font-weight:800;line-height:1.02;letter-spacing:-2.4px}
+.hero-title{margin:22px 0 0;color:var(--ink);font-size:clamp(38px,4.6vw,64px);font-weight:800;line-height:1.02;letter-spacing:-2.4px}
 .hero-copy{max-width:580px;margin-top:28px;color:var(--muted);font-size:18px;line-height:1.7}
 .hero-buttons{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
 .hero-stats{display:flex;gap:34px;margin-top:46px}
@@ -492,3 +492,7 @@ table.data td.n{font-style:italic}
 dialog.review{border-radius:0}
 @media(max-width:1120px){.nav-links{background:var(--paper)}}
 @media(max-width:850px){.company-card{padding:28px 0}.cc-name::before{font-size:34px;min-width:48px}.top-card{box-shadow:5px 5px 0 var(--paper-3)}}
+
+.footer .nav-logo i{color:#e3c58f}
+@media(max-width:960px){.hero-grid{grid-template-columns:1fr;gap:40px;padding:48px 0}}
+@media(max-width:850px){.nav-logo{font-size:24px}.hero-title{letter-spacing:-.02em}.section-top{padding-top:20px}}
