@@ -543,7 +543,7 @@ def footer_inline(depth=0, base=None):
 <a href="{p}redakcionnaya-politika.html">Редакционная политика</a><a href="{p}otkaz-ot-otvetstvennosti.html">Отказ от ответственности</a><a href="{p}pravila-polzovaniya.html">Правила пользования</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div>{footer_contacts()}</div>
 </div>
 <nav class="footer-tags" aria-label="Популярные темы"><span class="footer-tags-title">Популярные темы</span>
-<a href="{p}{TOPICS[0]["file"]}">Продать коньяк и арманьяк</a><a href="{p}{TOPICS[1]["file"]}">Продать виски</a><a href="{p}{TOPICS[0]["file"]}">Продать вино</a><a href="{p}{TOPICS[0]["file"]}">Шампанское и портвейн</a><a href="{p}{TOPICS[0]["file"]}">Алкоголь СССР и винтажный алкоголь</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#prepare">Оценка по фото</a><a href="{home}#choose">Как не потерять в цене</a><a href="{home}#faq">Вопросы о продаже</a>
+<a href="{p}{TOPICS[1]["file"]}">Продать виски</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор выкупа</a><a href="{home}#prepare">Как подготовить бутылку</a><a href="{home}#choose">Вопросы перед сделкой</a><a href="{home}#faq">Частые вопросы</a>
 </nav>
 <div class="legal">
 <p><strong>18+</strong> На сайте размещена информация об алкогольной продукции, он рассчитан на лиц старше 18 лет. Чрезмерное потребление алкоголя вредит здоровью. Продавать алкоголь лицам младше 18 лет запрещено.</p>
