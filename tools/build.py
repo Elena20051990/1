@@ -524,11 +524,24 @@ def age_gate_html():
 """
 
 
+def expert_mini(p):
+    """Небольшой блок об эксперте перед подвалом на каждой странице."""
+    if not EXPERT["show"]:
+        return ""
+    photo = f'<img class="em-photo" src="{p}{EXPERT["photo"]}" alt="{e(EXPERT["name"])}" width="72" height="72" loading="lazy">' if EXPERT.get("photo") else ""
+    role = e(EXPERT["role"])
+    return f'''<section class="expert-mini" aria-label="Эксперт сайта"><div class="container em-inner">
+{photo}<div class="em-text"><span class="em-label">Эксперт сайта</span><strong class="em-name">{e(EXPERT["name"])}</strong><span class="em-role">{role}</span><span class="em-meta">{e(EXPERT["credentials"])}</span></div>
+<a class="btn btn-outline em-link" href="{p}o-reitinge.html#author">Об эксперте <span class="arrow">→</span></a>
+</div></section>
+'''
+
+
 def footer_inline(depth=0, base=None):
     p = base if base else "../" * depth
     home = base if base else (p or "./")
     op = f"Оператор сайта: {ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}"
-    return f"""<footer class="footer">
+    return expert_mini(p) + f"""<footer class="footer">
 <div class="container">
 <div class="footer-main">
 <div>
