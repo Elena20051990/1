@@ -2353,7 +2353,14 @@ def _icon(title, i):
 
 
 def decorate_prose(page):
-    """Длинные блоки .prose из абзацев «<strong>Заголовок.</strong> текст» -> сетка карточек с иконками."""
+    """Блоки .prose из абзацев «<strong>Заголовок.</strong> текст»: короткие пункты — парами карточек одной высоты,
+    длинные — строками «заголовок слева, текст справа». Вступительные абзацы остаются обычным текстом."""
+    def card(t, body):
+        return f'<article class="pcard"><h3>{t}</h3><p>{body}</p></article>'
+
+    def row(t, body):
+        return f'<div class="prow"><h3>{t}</h3><p>{body}</p></div>'
+
     def conv(m):
         inner = m.group(2)
         ps = re.findall(r"<p>.*?</p>", inner, flags=re.S)
@@ -2362,13 +2369,29 @@ def decorate_prose(page):
             return m.group(0)
         head = re.findall(r"<h[23][^>]*>.*?</h[23]>", inner, flags=re.S)
         intro = [p for p in ps if p not in strong]
-        cards = []
-        for i, p in enumerate(strong):
+        items = []
+        for p in strong:
             t = re.match(r"<p><strong>([^<]+)</strong>", p).group(1).strip().rstrip(".:").strip()
-            body = re.sub(r"^<p><strong>[^<]+</strong>\s*", "", p)[:-4].strip()
-            wide = " wide" if len(body) > 900 else ""
-            cards.append(f'<article class="pcard{wide}">{_icon(t, i)}<h3>{t}</h3><p>{body}</p></article>')
-        return f'<div class="prose-cards">{"".join(head)}{"".join(intro)}<div class="pgrid">{"".join(cards)}</div></div>'
+            items.append((t, re.sub(r"^<p><strong>[^<]+</strong>\s*", "", p)[:-4].strip()))
+        out, buf = [], []
+
+        def flush():
+            if len(buf) == 2:
+                out.append('<div class="pgrid">' + "".join(card(*x) for x in buf) + "</div>")
+            else:
+                out.extend(row(*x) for x in buf)
+            buf.clear()
+
+        for t, body in items:
+            if len(body) <= 430:
+                buf.append((t, body))
+                if len(buf) == 2:
+                    flush()
+            else:
+                flush()
+                out.append(row(t, body))
+        flush()
+        return f'<div class="prose-cards">{"".join(head)}{"".join(intro)}{"".join(out)}</div>'
     return re.sub(r'<div class="prose"( style="[^"]*")?>(.*?)</div>', lambda m: conv(m), page, flags=re.S)
 
 
