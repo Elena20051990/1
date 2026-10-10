@@ -2316,6 +2316,66 @@ BANDS = {
 }
 
 
+
+ICONS = {
+    "bottle": '<path d="M10 2h4v4l1.5 3v11a2 2 0 0 1-2 2h-3a2 2 0 0 1-2-2V9L10 6z"/><path d="M8.5 13h7"/>',
+    "search": '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/>',
+    "shield": '<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+    "clock": '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+    "tag": '<path d="M3 12V4h8l9 9-8 8z"/><circle cx="8" cy="8.5" r="1.2"/>',
+    "doc": '<path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4M9.5 12h5M9.5 16h5"/>',
+    "pin": '<path d="M12 21s6-5.5 6-11a6 6 0 1 0-12 0c0 5.5 6 11 6 11z"/><circle cx="12" cy="10" r="2.2"/>',
+    "star": '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+}
+ICON_RULES = [("оцен", "search"), ("цен", "tag"), ("стоим", "tag"), ("подлин", "shield"), ("провер", "shield"), ("хран", "bottle"),
+              ("упаков", "bottle"), ("назван", "doc"), ("заявк", "doc"), ("связ", "doc"), ("расч", "tag"), ("встреч", "clock"),
+              ("этап", "clock"), ("когда", "clock"), ("москв", "pin"), ("город", "pin"), ("страны", "pin"), ("кто", "star")]
+ICON_CYCLE = ["bottle", "search", "shield", "tag", "doc", "clock", "pin", "star"]
+
+
+def _icon(title, i):
+    t = title.lower()
+    name = next((n for k, n in ICON_RULES if k in t), ICON_CYCLE[i % len(ICON_CYCLE)])
+    return f'<span class="pcard-ico" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">{ICONS[name]}</svg></span>'
+
+
+def decorate_prose(page):
+    """Длинные блоки .prose из абзацев «<strong>Заголовок.</strong> текст» -> сетка карточек с иконками."""
+    def conv(m):
+        inner = m.group(2)
+        ps = re.findall(r"<p>.*?</p>", inner, flags=re.S)
+        strong = [p for p in ps if re.match(r"<p><strong>[^<]+</strong>", p)]
+        if len(strong) < 3:
+            return m.group(0)
+        head = re.findall(r"<h[23][^>]*>.*?</h[23]>", inner, flags=re.S)
+        intro = [p for p in ps if p not in strong]
+        cards = []
+        for i, p in enumerate(strong):
+            t = re.match(r"<p><strong>([^<]+)</strong>", p).group(1).strip().rstrip(".:").strip()
+            body = re.sub(r"^<p><strong>[^<]+</strong>\s*", "", p)[:-4].strip()
+            wide = " wide" if len(body) > 900 else ""
+            cards.append(f'<article class="pcard{wide}">{_icon(t, i)}<h3>{t}</h3><p>{body}</p></article>')
+        return f'<div class="prose-cards">{"".join(head)}{"".join(intro)}<div class="pgrid">{"".join(cards)}</div></div>'
+    return re.sub(r'<div class="prose"( style="[^"]*")?>(.*?)</div>', lambda m: conv(m), page, flags=re.S)
+
+
+STATS = [("67–72%", "обычный уровень выкупа от рыночной цены бутылки"), ("28–33%", "дисконт по таблице 1buyup: потолок выкупа против рынка"),
+         ("до −30%", "к цене, если нет оригинальной коробки (данные Red Decanter)"), ("×2,5", "разброс «от» и «до» по Yamazaki 18: 80 000 против 32 000 ₽")]
+
+
+def stats_strip():
+    tiles = "".join(f'<div class="stat-tile"><b>{e(a)}</b><span>{e(b)}</span></div>' for a, b in STATS)
+    return f'<section class="section stats-section" aria-label="Цифры рынка"><div class="container"><div class="stats-strip">{tiles}</div><p class="note">Ориентиры по открытым данным компаний и таблицам цен; не оферта и не гарантия выплаты.</p></div></section>\n'
+
+
+def decorate_page(page, key):
+    page = decorate_prose(page)
+    if key in ("gde-prodat-viski.html", "gde-prodat-elitnyy-alkogol.html"):
+        m = re.search(r'<section class="section[^"]*" id="guide">', page)
+        if m:
+            page = page[:m.start()] + stats_strip() + page[m.start():]
+    return page
+
 def add_bands(page, key):
     for sid, img, eyebrow, text, href, label in BANDS.get(key, []):
         marker = f'id="{sid}"'
@@ -2331,12 +2391,12 @@ def add_bands(page, key):
 
 
 def main():
-    (ROOT / "index.html").write_text(add_bands(index_page(), "index.html"), encoding="utf-8")
+    (ROOT / "index.html").write_text(decorate_page(add_bands(index_page(), "index.html"), "index.html"), encoding="utf-8")
     (ROOT / "prices.html").write_text(prices_page(), encoding="utf-8")
-    (ROOT / "metodika.html").write_text(methodology_page(), encoding="utf-8")
-    (ROOT / "o-reitinge.html").write_text(about_page(), encoding="utf-8")
+    (ROOT / "metodika.html").write_text(decorate_page(methodology_page(), "metodika.html"), encoding="utf-8")
+    (ROOT / "o-reitinge.html").write_text(decorate_page(about_page(), "o-reitinge.html"), encoding="utf-8")
     for tp in TOPICS:
-        (ROOT / tp["file"]).write_text(add_bands(topic_page(tp), tp["file"]), encoding="utf-8")
+        (ROOT / tp["file"]).write_text(decorate_page(add_bands(topic_page(tp), tp["file"]), tp["file"]), encoding="utf-8")
     (ROOT / "c").mkdir(exist_ok=True)
     write_covers()
     for i, c in enumerate(CARDS):
