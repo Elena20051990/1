@@ -1,0 +1,7 @@
+# Шапка и подвал подключаются директивами SSI (<!--#include virtual="/includes/..." -->)
+Options +Includes
+AddType text/html .html
+AddOutputFilter INCLUDES .html
+
+# Старый адрес страницы про вино
+Redirect 301 /gde-prodat-elitnoe-vino.html /gde-prodat-viski.html
