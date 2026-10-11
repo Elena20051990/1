@@ -496,7 +496,7 @@ def expert_block(depth=0):
     p = "../" * depth
     photo = ""
     if (ROOT / EXPERT["photo"]).exists():
-        photo = f'<img class="ex-photo" src="{p}{EXPERT["photo"]}" alt="{e(EXPERT["name"])}" width="160" height="160" loading="lazy">'
+        photo = f'<img class="ex-photo" src="{p}{EXPERT["photo"]}" alt="{e(EXPERT["name"])}" width="200" height="250" loading="lazy">'
     about = "".join(f"<p>{e(t)}</p>" for t in EXPERT["about"].split("\n\n")) if EXPERT["about"] else f"<p>{ph('name', 'коротко об опыте автора')}</p>"
     cred = f"<p class=\"ex-cred\">{e(EXPERT['credentials'])}</p>" if EXPERT["credentials"] else ""
     disc = f"<p class=\"ex-disc\">{e(EXPERT['disclosure'])}</p>" if EXPERT["disclosure"] else f"<p class=\"ex-disc\">{ph('name', 'раскройте связь автора с оцениваемыми компаниями и платные услуги автора, если они есть')}</p>"

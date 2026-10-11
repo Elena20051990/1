@@ -522,3 +522,9 @@ dialog.review{border-radius:0}
 .quote-block figcaption b{color:var(--ink)}
 .quote-block figcaption span{color:var(--muted);letter-spacing:.02em;text-transform:none}
 @media(max-width:850px){.quote-block{padding:48px 0}.quote-block figure{padding-left:0;padding-top:40px}.quote-block figure::before{top:-14px}}
+.em-photo,.ex-photo{object-position:58% 12%}
+.ea-photo{object-position:58% 12%}
+.em-photo{width:88px;height:88px}
+.ex-card{align-items:flex-start}
+.ex-photo{width:200px;height:250px;border-radius:0;border:1px solid var(--ink)}
+@media(max-width:600px){.ex-photo{width:100%;height:280px}}
