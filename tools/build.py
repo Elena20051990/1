@@ -59,7 +59,8 @@ POLICY_DATE = "10 октября 2026 г."
 
 SITE = "drink-guru.ru"
 SITE_SUB = "Рейтинг скупок алкоголя"
-LOGO = SITE.split(".")[0] + "<i>." + SITE.split(".", 1)[1] + "</i>"
+_n, _ext = SITE.split(".", 1)
+LOGO = "-<b>".join(_n.split("-", 1)) + "</b>." + _ext if "-" in _n else _n + "." + _ext
 UPDATED = "30 сентября 2026"
 e = html.escape
 
@@ -374,7 +375,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
 <meta name="robots" content="{"noindex, follow" if path in NOINDEX_PAGES else ROBOTS_META}">
-<meta name="theme-color" content="#8a2b34">
+<meta name="theme-color" content="#1b130a">
 <link rel="canonical" href="{url}">
 {verify}<link rel="alternate" type="application/json" href="{SITE_URL}/data/companies.json" title="Данные рейтинга (JSON)">
 <link rel="icon" href="{p}assets/favicon.png" type="image/png">
@@ -393,7 +394,7 @@ def head(title, desc, depth=0, path="", ld=None):
 <meta name="twitter:image" content="{SITE_URL}/assets/og.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{p}assets/style.css?v={ASSET_V}">
 {jsonld(site_ld, org, page_ld, *(ld or []))}
 {YM_SCRIPT.replace("__ID__", YM_ID) if YM_ID else ""}</head>
@@ -443,7 +444,7 @@ def header_inline(depth=0, base=None):
 </div></div>
 <header class="header" id="header">
 <div class="container header-inner">
-<a href="{home}" class="nav-logo" aria-label="{SITE} — главная страница" title="Главная: рейтинг скупок алкоголя"><span>{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></a>
+<a href="{home}" class="nav-logo" aria-label="{SITE} — главная страница" title="Главная: рейтинг скупок алкоголя"><img class="logo-mark" src="{p}assets/logo-mark.png" alt="" width="58" height="56"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
 <span class="age-badge" title="Сайт для лиц старше 18 лет">18+</span>
 <nav class="nav-links" id="navLinks" aria-label="Главная навигация">
 {links}
@@ -621,7 +622,7 @@ def footer_inline(depth=0, base=None):
 <div class="container">
 <div class="footer-main">
 <div>
-<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><span>{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></a>
+<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img class="logo-mark" src="{p}assets/logo-mark.png" alt="" width="58" height="56"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
 <p class="footer-logo-copy">Независимый рейтинг скупок: какие компании в Москве, Московской области и других городах России выкупают коньяк, виски, вино, шампанское, ром, арманьяк и алкоголь СССР, как быстро оценивают по фото и на каких условиях выезжают. Мы сами ничего не покупаем: фотографии и заявку вы отправляете выбранной компании — удобным способом, через форму на её сайте или в мессенджер.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
