@@ -430,7 +430,7 @@ def header_inline(depth=0, base=None):
 </div></div>
 <header class="header" id="header">
 <div class="container header-inner">
-<a href="{home}" class="nav-logo" aria-label="{SITE} — главная страница" title="Главная: рейтинг скупок алкоголя"><svg class="logo-mark" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#5b3df5"/><path d="M19 9h10v4l-2 3v5c3 2 5 5 5 9v8H16v-8c0-4 2-7 5-9v-5l-2-3z" fill="#fff"/><circle cx="35" cy="13" r="5" fill="#ff5a5f"/></svg><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
+<a href="{home}" class="nav-logo" aria-label="{SITE} — главная страница" title="Главная: рейтинг скупок алкоголя"><img class="logo-mark" src="{p}assets/logo-mark.png" alt="" width="40" height="44"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
 <span class="age-badge" title="Сайт для лиц старше 18 лет">18+</span>
 <nav class="nav-links" id="navLinks" aria-label="Главная навигация">
 {links}
@@ -593,7 +593,7 @@ def footer_inline(depth=0, base=None):
 <div class="container">
 <div class="footer-main">
 <div>
-<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><svg class="logo-mark" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><rect width="48" height="48" rx="14" fill="#5b3df5"/><path d="M19 9h10v4l-2 3v5c3 2 5 5 5 9v8H16v-8c0-4 2-7 5-9v-5l-2-3z" fill="#fff"/><circle cx="35" cy="13" r="5" fill="#ff5a5f"/></svg><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
+<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img class="logo-mark" src="{p}assets/logo-mark.png" alt="" width="40" height="44"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
 <p class="footer-logo-copy">Независимый рейтинг скупок алкоголя: кто в Москве, области и других городах России берёт коньяк, виски, вино, шампанское, ром, арманьяк и алкоголь СССР, как скоро оценивает по фото и на каких условиях приезжает. Сами мы ничего не покупаем: снимки и заявку вы отправляете выбранной компании — через форму на её сайте или в мессенджер.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
