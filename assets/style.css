@@ -705,3 +705,30 @@ dialog.review{border-radius:var(--r-lg)}
 .range{height:6px;background:linear-gradient(90deg,#f6b8c4,#fff);box-shadow:0 0 18px rgba(246,184,196,.6)}
 .result-disclaimer{color:#e8c3cb}
 .result-price{font-size:clamp(32px,3.5vw,52px)}
+/* ритм страницы: чередование фона секций, без линеек над заголовками */
+.section{background:var(--paper)}
+.section.alt{background:#f2e2e7}
+.section-top{border-top:0;padding-top:0}
+.ranking-section{background:transparent}
+.section.alt .table-wrap,.section.alt .faq details{background:#fff}
+@media(min-width:1100px){.steps-grid{grid-template-columns:repeat(5,1fr)}#kinds .trust-grid{grid-template-columns:repeat(3,1fr)}.cross-grid{grid-template-columns:repeat(4,1fr)}}
+.faq{max-width:none;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+.faq details{margin-bottom:0}
+@media(max-width:850px){.faq{grid-template-columns:1fr}}
+.final-cta{background:var(--paper);border-top:0}
+.expert-mini{background:#fff;border-top:1px solid var(--line)}
+.header{border-bottom:1px solid var(--line);box-shadow:0 4px 18px rgba(110,15,39,.06)}
+.prose .pcard p,.pcard p,.prose .prow p,.prow p,.prose-cards>p,.section-copy,.calculator-copy{color:#4f4649}
+.step p,.trust-item p,.factors article p{color:#4f4649}
+.steps-list li{color:#4f4649}
+@media(max-width:600px){
+.header-inner{gap:10px}
+.age-badge,.header-cta{display:none}
+.logo-word{font-size:19px}.logo-mark{height:38px}.nav-logo-sub{font-size:8px;letter-spacing:.12em}
+.filters{flex-wrap:wrap}
+.company-card,.company-list .company-card:last-child{padding:18px}
+.cc-body,.cc-main,.cc-side,.cc-text,.cc-foot{min-width:0}
+.cc-name{font-size:22px;overflow-wrap:anywhere}
+.cc-foot{flex-direction:column;align-items:stretch}
+.cc-actions{flex-wrap:wrap}
+}

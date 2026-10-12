@@ -2253,7 +2253,22 @@ def postprocess(html):
     """Семантика таблиц: scope у заголовков."""
     html = re.sub(r"(<thead>.*?</thead>)", lambda m: m.group(1).replace("<th>", '<th scope="col">'), html, flags=re.S)
     html = re.sub(r"(<table class=\"facts-table\">.*?</table>)", lambda m: m.group(1).replace("<th>", '<th scope="row">'), html, flags=re.S)
-    return html
+    return alternate_sections(html)
+
+
+def alternate_sections(html):
+    """Чередование фона: каждая вторая обычная секция получает класс alt."""
+    n = [0]
+
+    def sub(m):
+        cls = m.group(1).split()
+        if "section" not in cls or "alt" in cls:
+            return m.group(0)
+        n[0] += 1
+        if n[0] % 2 == 0:
+            cls.append("alt")
+        return f'<section class="{" ".join(cls)}"'
+    return re.sub(r'<section class="([^"]*)"', sub, html)
 
 
 def editorial_page():
@@ -2366,7 +2381,6 @@ def write_seo_files(pages):
 # Контрастные вставки-цитаты между блоками (без кнопок и перелинковки): (id секции, перед которой вставить, картинка-класс, подпись, текст, —, —)
 BANDS = {
     "index.html": [
-        ("calc", "banner2.jpg", "Прежде чем продавать", "Сопоставляйте не только цены, но и условия: срок оценки, способ оплаты и приезд курьера.", "#choose", "Пять вопросов перед сделкой"),
         ("prepare", "banner3.jpg", "Подготовка", "Коробка, документы и неповреждённая этикетка ощутимо влияют на итоговую цену выкупа.", "#prepare", "Как подготовить бутылку"),
     ],
     "gde-prodat-elitnyy-alkogol.html": [
@@ -2416,9 +2430,9 @@ def decorate_prose(page):
         inner = m.group(2)
         ps = re.findall(r"<p>.*?</p>", inner, flags=re.S)
         strong = [p for p in ps if re.match(r"<p><strong>[^<]+</strong>", p)]
-        if len(strong) < 3:
-            return m.group(0)
         head = re.findall(r"<h[23][^>]*>.*?</h[23]>", inner, flags=re.S)
+        if len(strong) < 3 or len(head) > 1 or "<ol" in inner or "<ul" in inner:
+            return m.group(0)
         intro = [p for p in ps if p not in strong]
         items = []
         for p in strong:
