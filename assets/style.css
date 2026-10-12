@@ -650,3 +650,4 @@ dialog.review{border-radius:var(--r-lg)}
 .mission-statement::after{background:var(--coral)}
 .mission-copy{color:#e6e2ff}
 .mission .eyebrow{color:#ffd3d4}
+.ex-photo{width:150px;height:150px;aspect-ratio:1;object-fit:cover;object-position:50% 20%}
