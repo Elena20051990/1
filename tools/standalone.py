@@ -17,7 +17,9 @@ def inline(page: Path) -> str:
 
     def ssi(m):
         inc = (ROOT / m.group(1).lstrip("/")).read_text(encoding="utf-8")
-        return re.sub(r'(src|href)="/(?=assets/)', lambda x: f'{x.group(1)}="{rel}', inc)
+        inc = re.sub(r'(src|href)="/(?=assets/)', lambda x: f'{x.group(1)}="{rel}', inc)
+        inc = re.sub(r'href="/(#[^"]*)?"', lambda x: f'href="{rel}index.html{x.group(1) or ""}"', inc)
+        return re.sub(r'href="/([^"/][^"]*)"', lambda x: f'href="{rel}{x.group(1)}"', inc)
 
     html = re.sub(r'<!--#include virtual="([^"]+)" -->', ssi, html)
 
