@@ -1,7 +1,7 @@
 <?php
 // Приём отзывов и обращений организаций: пересылает их на e-mail оператора. Ничего не сохраняет на сервере, кроме метки времени для ограничения частоты.
-const TO = 'support@bottle-rank.ru';
-const FROM = 'noreply@bottle-rank.ru';   // ящик на домене сайта (создайте его в панели хостинга, если ещё нет)
+const TO = 'info@drink-reviews.ru';
+const FROM = 'noreply@drink-reviews.ru';   // ящик на домене сайта (создайте его в панели хостинга, если ещё нет)
 
 header('Content-Type: application/json; charset=utf-8');
 function out($code, $ok) { http_response_code($code); echo json_encode(['ok' => $ok]); exit; }

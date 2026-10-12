@@ -51,4 +51,4 @@ Disallow: /tools/
 Disallow: /includes/
 Disallow: /send.php
 
-Sitemap: https://bottle-rank.ru/sitemap.xml
+Sitemap: https://drink-reviews.ru/sitemap.xml

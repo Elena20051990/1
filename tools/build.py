@@ -15,10 +15,10 @@ TXT = (ROOT / "tools" / "niche.txt").read_text(encoding="utf-8")
 LINES = [html.unescape(l).rstrip() for l in TXT.split("\n")]
 
 # ---- Настройки, которые нужно заполнить перед запуском -------------------------------------------
-SITE_URL = "https://bottle-rank.ru"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
+SITE_URL = "https://drink-reviews.ru"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
 OPERATOR = dict(                      # оператор сайта и персональных данных (подставляется в политики и на страницу «Для компаний»)
     name="Александр Грудинин",
-    email="support@bottle-rank.ru",     # e-mail для обращений
+    email="info@drink-reviews.ru",     # e-mail для обращений
 )
 # Как подключать шапку и подвал: "inline" — блок вставляется в каждую страницу при сборке (работает на любом хостинге);
 # "ssi" — на страницах стоит директива <!--#include virtual="/includes/header.html" --> (нужна поддержка SSI на сервере и размещение в корне домена).
@@ -53,7 +53,7 @@ BUILD_DATE = "2026-10-10"             # дата для sitemap (lastmod)
 POLICY_DATE = "10 октября 2026 г."
 # --------------------------------------------------------------------------------------------------
 
-SITE = "bottle-rank.ru"
+SITE = "drink-reviews.ru"
 SITE_SUB = "Рейтинг скупок алкоголя"
 _n, _ext = SITE.split(".", 1)
 LOGO = "-<b>".join(_n.split("-", 1)) + "</b>." + _ext if "-" in _n else _n + "." + _ext
