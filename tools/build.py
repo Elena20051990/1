@@ -632,8 +632,8 @@ def footer_inline(depth=0, base=None):
 <div><h3 class="footer-title">Документы</h3><div class="footer-links">
 <a href="{p}redakcionnaya-politika.html">Редакционная политика</a><a href="{p}otkaz-ot-otvetstvennosti.html">Отказ от ответственности</a><a href="{p}pravila-polzovaniya.html">Правила пользования</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div>{footer_contacts()}</div>
 </div>
-<nav class="footer-tags" aria-label="Популярные темы"><span class="footer-tags-title">Что выкупают</span>
-<a href="{p}{TOPICS[0]["file"]}">Коньяк и бренди</a><a href="{p}{TOPICS[1]["file"]}">Водка</a><a href="{p}{TOPICS[0]["file"]}#guide">Виски</a><a href="{p}{TOPICS[0]["file"]}">Вино и шампанское</a><a href="{p}{TOPICS[0]["file"]}">Ром и арманьяк</a><a href="{p}{TOPICS[1]["file"]}">Алкоголь СССР</a><a href="{p}{TOPICS[0]["file"]}">Редкие и винтажные бутылки</a><a href="{p}prices.html">Стоимость и цены выкупа</a><a href="{home}#prepare">Сохранность и упаковка</a><a href="{home}#faq">Частые вопросы</a>
+<nav class="footer-tags" aria-label="Разделы сайта"><span class="footer-tags-title">Разделы сайта</span>
+<a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Водка</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор выкупа</a><a href="{home}#prepare">Как подготовить бутылку</a><a href="{home}#faq">Вопросы и ответы</a>
 </nav>
 <div class="legal">
 <p><strong>18+</strong> На сайте размещена информация об алкогольной продукции, он рассчитан на лиц старше 18 лет. Чрезмерное потребление алкоголя вредит здоровью. Продавать алкоголь лицам младше 18 лет запрещено.</p>
