@@ -436,7 +436,6 @@ def header_inline(depth=0, base=None):
 {links}
 </nav>
 <div class="header-actions">
-<a href="{home}#calc" class="btn btn-primary header-cta" title="Оценить стоимость бутылки: калькулятор выкупа">Оценить стоимость <span class="arrow">→</span></a>
 <button class="menu-btn" id="menuBtn" type="button" aria-label="Меню" aria-expanded="false" aria-controls="navLinks">☰</button>
 </div>
 </div>
@@ -874,7 +873,7 @@ def independence_section():
 def methodology_page():
     clusters = "".join(
         f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
-    return head(f"Методика рейтинга скупок алкоголя: данные, критерии, оценка — {SITE}",
+    return head(f"Методика рейтинга скупок алкоголя — {SITE}",
                 "Как устроен рейтинг скупок алкоголя в Москве: источники данных, критерии оценки, факторы стоимости бутылки, ограничения и сайты, которые, вероятно, принадлежат одному оператору.",
                 path="metodika.html", ld=[breadcrumbs(("Главная", ""), ("Методика", "metodika.html"))]) + header() + f"""
 <main id="top">
@@ -921,7 +920,7 @@ def methodology_page():
 
 
 def about_page():
-    return head(f"О проекте и эксперте: независимый рейтинг скупок алкоголя — {SITE}",
+    return head(f"О проекте и эксперте — {SITE}",
                 "О проекте: независимый рейтинг скупок элитного и коллекционного алкоголя в Москве. Кто эксперт сайта, откуда данные и почему сайт ничего не покупает.",
                 path="o-reitinge.html", ld=[{"@context": "https://schema.org", "@type": "AboutPage", "name": f"О рейтинге — {SITE}", "url": f"{SITE_URL}/o-reitinge.html", "inLanguage": "ru"}, breadcrumbs(("Главная", ""), ("О рейтинге", "o-reitinge.html")), expert_ld()]) + header() + f"""
 <main id="top">
@@ -992,7 +991,7 @@ def index_page():
     clusters = "".join(
         f"<tr><td>{e(n)}</td><td>{', '.join(e(d) for d in ds)}</td></tr>" for n, ds in CLUSTERS)
     priced = sum(1 for c in CARDS if c["meta"]["price"] not in ("Не публикует", "Не проверено"))
-    body = head(f"Скупка алкоголя в Москве: рейтинг компаний, куда продать коньяк и виски — {SITE}",
+    body = head(f"Скупка алкоголя в Москве: куда продать коньяк и виски — {SITE}",
                 "Куда продать коньяк, виски, вино и шампанское в Москве и области: рейтинг 20 скупок коллекционного алкоголя, цены выкупа, срок оценки по фото, выезд и условия сделки.",
                 path="", ld=[itemlist(CARDS), faq_ld()]) + header() + f"""
 <main id="top">
@@ -1541,7 +1540,7 @@ def company_page(c, i):
         nav += f'<a href="{prev_c["slug"]}.html" class="btn btn-outline">← {e(prev_c["name"])}</a>'
     if next_c:
         nav += f'<a href="{next_c["slug"]}.html" class="btn btn-outline">{e(next_c["name"])} →</a>'
-    return head(f"{c['name']}: обзор скупки алкоголя, условия и цены — {SITE}",
+    return head(f"{c['name']}: обзор скупки, условия и цены — {SITE}",
                 f"{c['name']} ({c['domain']}): график работы, срок оценки по фото, выезд, цены выкупа, плюсы и минусы. Оценка редакции — {scores(c)[1]:g} из 5.", 1,
                 path=f"c/{c['slug']}.html", ld=[breadcrumbs(("Главная", ""), (c["name"], f"c/{c['slug']}.html")), review_ld(c)]) + header(1) + f"""
 <main class="page">
@@ -1578,7 +1577,7 @@ def prices_page():
     main = "".join("<tr>" + f"<td>{e(r[0])}</td>" + "".join(td(v) for v in r[1:]) + "</tr>" for r in PRICES)
     rum = "".join(f"<tr><td>{e(a)}</td><td>{e(b)} ₽</td></tr>" for a, b in RUM)
     seg = "".join(f"<tr><td>{e(a)}</td><td>{e(b)}</td></tr>" for a, b in SEG)
-    return head(f"Цены выкупа алкоголя в Москве: виски, коньяк, вино, шампанское — {SITE}",
+    return head(f"Цены выкупа алкоголя в Москве — {SITE}",
                 "Сколько платят за виски, коньяк, шампанское и вино: открытые цены выкупа 700ml, 1buyup, Red Decanter и SKUPKA-ALKOGOL в одной таблице с пометками «от», «до» и «прибл.».",
                 path="prices.html", ld=[breadcrumbs(("Главная", ""), ("Цены выкупа", "prices.html"))]) + header() + f"""
 <main class="page">
@@ -1604,14 +1603,14 @@ def prices_page():
 TOPICS = [
     dict(file="gde-prodat-elitnyy-alkogol.html", key="elite",
          nav="Элитный алкоголь",
-         title=f"Продать элитный и коллекционный алкоголь в Москве: рейтинг скупок — {SITE}",
+         title=f"Продать элитный алкоголь в Москве: рейтинг скупок — {SITE}",
          desc="Куда продать элитный и коллекционный алкоголь в Москве: рейтинг скупок редкого виски, коньяка, вина и шампанского. Цена выкупа, срок оценки по фото, выезд, сохранность и упаковка.",
          h1="Куда продать элитный алкоголь?",
          eyebrow="Рейтинг · премиум и коллекционные бутылки",
          lead="Сравниваем компании, которые выкупают редкий виски, выдержанный коньяк, марочное вино и шампанское: кто открыто называет цену на дорогие бутылки, как быстро оценивает по фото и когда выезжает. Ниже — что считают элитным алкоголем, как определить ценность бутылки и на что обратить внимание до сделки."),
         dict(file="gde-prodat-vodku.html", key="vodka",
          nav="Водка",
-         title=f"Продать водку в Москве: коллекционная и премиальная, рейтинг скупок — {SITE}",
+         title=f"Продать водку в Москве: рейтинг скупок — {SITE}",
          desc="Куда продать водку в Москве: кто принимает коллекционные, лимитированные и советские бутылки, а кто берёт недорогие позиции. Рейтинг скупок, срок оценки по фото, выезд, сохранность и упаковка.",
          h1="Куда продать водку?",
          eyebrow="Рейтинг · коллекционная и премиальная водка",
