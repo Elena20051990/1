@@ -13,6 +13,13 @@ OUT.mkdir(exist_ok=True)
 def inline(page: Path) -> str:
     html = page.read_text(encoding="utf-8")
     base = page.parent
+    rel = "../" * len(page.relative_to(ROOT).parts[:-1])
+
+    def ssi(m):
+        inc = (ROOT / m.group(1).lstrip("/")).read_text(encoding="utf-8")
+        return re.sub(r'(src|href)="/(?=assets/)', lambda x: f'{x.group(1)}="{rel}', inc)
+
+    html = re.sub(r'<!--#include virtual="([^"]+)" -->', ssi, html)
 
     def css(m):
         return "<style>" + (base / m.group(1)).resolve().read_text(encoding="utf-8") + "</style>"
@@ -27,8 +34,8 @@ def inline(page: Path) -> str:
         mime = {"svg": "image/svg+xml", "jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp"}[f.suffix[1:]]
         return f'{m.group(1)}src="data:{mime};base64,{base64.b64encode(f.read_bytes()).decode()}"'
 
-    html = re.sub(r'<link rel="stylesheet" href="([^"]+\.css)">', css, html)
-    html = re.sub(r'<script src="([^"]+\.js)"></script>', js, html)
+    html = re.sub(r'<link rel="stylesheet" href="([^"?]+\.css)(?:\?[^"]*)?">', css, html)
+    html = re.sub(r'<script src="([^"?]+\.js)(?:\?[^"]*)?"></script>', js, html)
     html = re.sub(r'(<img [^>]*?)src="((?:\.\./)?assets/[^"]+)"', img, html)
     return html
 
