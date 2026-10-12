@@ -549,3 +549,20 @@ dialog.review{border-radius:0}
 @media(max-width:380px){.logo-mark{display:none}}
 .footer .logo-word b{color:#e2ae5c}
 .footer .nav-logo-sub{color:#bfae8e}
+
+/* миссия и цели */
+.mission{padding:84px 0;background:var(--ink);color:var(--paper)}
+.mission .eyebrow{color:var(--gold)}
+.mission-statement{max-width:980px;margin:22px 0 0;color:var(--paper);font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(30px,4.4vw,56px);line-height:1.18;letter-spacing:-.015em;text-wrap:balance}
+.mission-statement::after{content:"";display:block;width:96px;height:3px;margin-top:32px;background:var(--gold)}
+.mission-copy{max-width:760px;margin-top:28px;color:#d8cbb2;font-size:18px;line-height:1.75}
+.goals-section{background:var(--paper-2)}
+.goal-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.goal{position:relative;padding:34px 28px 28px;border:1px solid var(--ink);background:var(--white)}
+.goal::before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:4px;background:var(--gold)}
+.goal h3{margin-bottom:12px;color:var(--ink);font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.2}
+.goal p{color:var(--ink-2);font-size:15.5px;line-height:1.7}
+@media(max-width:960px){.goal-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.goal-grid{grid-template-columns:1fr}.mission{padding:56px 0}}
+.mission .eyebrow{color:#e2ae5c}.mission .eyebrow::before{background:#e2ae5c}
+.mission-statement::after{background:#e2ae5c}

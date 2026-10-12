@@ -16,13 +16,9 @@ LINES = [html.unescape(l).rstrip() for l in TXT.split("\n")]
 
 # ---- Настройки, которые нужно заполнить перед запуском -------------------------------------------
 SITE_URL = "https://drink-guru.ru"   # адрес сайта без слеша в конце (нужен для canonical, sitemap, robots, og)
-OPERATOR = dict(                      # оператор персональных данных (подставляется в политики и на страницу «Для компаний»)
-    name="Владимир Андреевич Назаров",      # ФИО или название организации/ИП
-    inn="",       # необязательно: если пусто — ИНН нигде не показывается
-    address="",   # необязательно: адрес редакции для обращений; если пусто — нигде не показывается
+OPERATOR = dict(                      # оператор сайта и персональных данных (подставляется в политики и на страницу «Для компаний»)
+    name="Владимир Андреевич Назаров",
     email="support@drink-guru.ru",     # e-mail для обращений
-    phone="",     # необязательно: показывается только если заполнено
-    telegram="",  # Telegram редакции, например @editor
 )
 # Как подключать шапку и подвал: "inline" — блок вставляется в каждую страницу при сборке (работает на любом хостинге);
 # "ssi" — на страницах стоит директива <!--#include virtual="/includes/header.html" --> (нужна поддержка SSI на сервере и размещение в корне домена).
@@ -209,12 +205,6 @@ def ph(key, label):
     return e(v) if v else f'<span class="ph">[укажите {label}]</span>'
 
 
-def opt(key, fmt):
-    """Необязательный реквизит: пусто, пока не заполнен в OPERATOR."""
-    v = OPERATOR.get(key, "")
-    return fmt.format(e(v)) if v else ""
-
-
 def jsonld(*objs):
     import json
     return "\n".join('<script type="application/ld+json">' + json.dumps(o, ensure_ascii=False).replace("</", "<\\/") + "</script>" for o in objs if o)
@@ -362,8 +352,6 @@ def head(title, desc, depth=0, path="", ld=None):
     if OPERATOR.get("email"):
         org["email"] = OPERATOR["email"]
         org["contactPoint"] = {"@type": "ContactPoint", "contactType": "customer support", "email": OPERATOR["email"], "availableLanguage": "ru"}
-    if OPERATOR.get("address"):
-        org["address"] = OPERATOR["address"]
     page_ld = {"@context": "https://schema.org", "@type": "WebPage", "name": title, "url": url, "description": desc, "inLanguage": "ru",
                "dateModified": BUILD_DATE, "isPartOf": {"@type": "WebSite", "name": SITE, "url": SITE_URL + "/"}, "publisher": {"@type": "Organization", "name": SITE}}
     verify = (f'<meta name="google-site-verification" content="{e(GOOGLE_VERIFY)}">\n' if GOOGLE_VERIFY else "") + (f'<meta name="yandex-verification" content="{e(YANDEX_VERIFY)}">\n' if YANDEX_VERIFY else "")
@@ -421,14 +409,12 @@ NAV_TITLES = {
     "#prepare": "Как продать бутылку: фото этикетки, пробки и упаковки, сохранность и условия хранения",
     "metodika.html": "Методика рейтинга: критерии, данные и расчёт оценки",
     "o-reitinge.html#author": "Эксперт сайта: опыт, подход к оценке и независимость рейтинга",
-    "kontakty.html": "Контакты редакции: Telegram, e-mail, вопросы и сообщения для компаний",
+    "kontakty.html": "Контакты редакции: e-mail, вопросы и сообщения для компаний",
 }
 
 
 def contact_short():
     parts = []
-    if OPERATOR.get("telegram"):
-        parts.append(f'<a href="https://t.me/{e(OPERATOR["telegram"].lstrip("@"))}" rel="nofollow">Telegram {e(OPERATOR["telegram"])}</a>')
     if OPERATOR.get("email"):
         parts.append(f'<a href="mailto:{e(OPERATOR["email"])}">{e(OPERATOR["email"])}</a>')
     return " · ".join(parts)
@@ -505,26 +491,11 @@ def expert_block(depth=0):
 """
 
 
-def contact_line():
-    parts = []
-    if OPERATOR.get("phone"):
-        parts.append(f"телефон {e(OPERATOR['phone'])}")
-    if OPERATOR.get("telegram"):
-        parts.append(f"Telegram {e(OPERATOR['telegram'])}")
-    if OPERATOR.get("email"):
-        parts.append(f"e-mail {e(OPERATOR['email'])}")
-    return f"<p>Связаться с редакцией: {', '.join(parts)}.</p>" if parts else ""
-
-
 def footer_contacts():
     """Блок «Контакты» в подвале: e-mail (и телефон, Telegram, если заданы) крупно и со ссылкой."""
     items = []
     if OPERATOR.get("email"):
         items.append(f'<a class="footer-mail" href="mailto:{e(OPERATOR["email"])}">{e(OPERATOR["email"])}</a>')
-    if OPERATOR.get("phone"):
-        items.append(f'<a class="footer-mail" href="tel:{e(re.sub(r"[^+0-9]", "", OPERATOR["phone"]))}">{e(OPERATOR["phone"])}</a>')
-    if OPERATOR.get("telegram"):
-        items.append(f'<a class="footer-mail" href="https://t.me/{e(OPERATOR["telegram"].lstrip("@"))}">Telegram {e(OPERATOR["telegram"])}</a>')
     if not items:
         return ""
     return '<h3 class="footer-title footer-title-next">Контакты</h3><div class="footer-links">' + "".join(items) + '</div>'
@@ -617,7 +588,7 @@ def quote_block(key):
 def footer_inline(depth=0, base=None):
     p = base if base else "../" * depth
     home = base if base else (p or "./")
-    op = f"Оператор сайта: {ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}{opt('address', ', адрес: {}')}"
+    op = f"Оператор сайта: {ph('name', 'ФИО оператора')}"
     return expert_mini(p) + f"""<footer class="footer">
 <div class="container">
 <div class="footer-main">
@@ -962,19 +933,32 @@ def about_page():
 </div>
 </section>
 {expert_block()}
+<section class="mission" id="mission">
+<div class="container">
+<span class="eyebrow">Миссия</span>
+<p class="mission-statement">Помогать продавать бутылки без иллюзий: честно показывать, сколько они стоят и кому можно доверять.</p>
+<p class="mission-copy">Коньяк, виски, вино, шампанское, водка и бутылки из советского прошлого — такие же предметы коллекций, как антиквариат. Их цену определяют редкость, состояние и честный разговор с оценщиком. Мы собираем открытые данные, сравниваем условия компаний и объясняем, что стоит за красивыми обещаниями, чтобы продавец мог принять решение спокойно и заранее.</p>
+</div>
+</section>
+<section class="section goals-section" id="goals">
+<div class="container">
+<div class="section-top">
+<div><span class="eyebrow">Цели</span><h2 class="section-title">Чего мы добиваемся</h2></div>
+<p class="section-copy">Шесть принципов, по которым составлен каждый обзор и каждая оценка на сайте.</p>
+</div>
+<div class="goal-grid">
+<article class="goal"><h3>Прозрачная цена</h3><p>Показываем реальный порядок сумм и объясняем, чем «от» отличается от «до», а рыночная цена — от цены выкупа.</p></article>
+<article class="goal"><h3>Факты отдельно от рекламы</h3><p>Заявления компаний («5000 сделок», «до 90% рынка») мы подписываем как заявления и не выдаём за проверенное.</p></article>
+<article class="goal"><h3>Защита продавца</h3><p>Рассказываем, как подготовить бутылку, какие вопросы задать до сделки и почему не стоит вносить предоплату.</p></article>
+<article class="goal"><h3>Честность о минусах</h3><p>О слабых сторонах компаний пишем так же подробно, как о сильных, и отмечаем сайты, которые, вероятно, принадлежат одному оператору.</p></article>
+<article class="goal"><h3>Независимость</h3><p>Места в рейтинге не продаются, попасть в список можно бесплатно, а компании для сравнения выбирает редакция по открытым данным.</p></article>
+<article class="goal"><h3>Культура коллекционирования</h3><p>Объясняем, что делает бутылку ценной: производитель, выдержка, хранение, упаковка и документы.</p></article>
+</div>
+</div>
+</section>
 <section class="section">
 <div class="container narrow">
 <div class="prose">
-<h2 class="sub" style="margin-top:0">Зачем мы это делаем</h2>
-<p>Выдержанный коньяк, винтажное вино, редкий виски и бутылки из советского прошлого — такие же предметы коллекций, как антиквариат. Цену им определяет не только рынок, но и честный разговор с оценщиком. Рейтинг нужен тем, кто хочет расстаться с бутылкой без иллюзий: понять, к кому обратиться, сколько она может стоить и на что смотреть до сделки.</p>
-<h2 class="sub">Принципы</h2>
-<ul class="goals">
-<li><strong>Спокойный взгляд на цену.</strong> Показываем реальный порядок сумм и объясняем, чем «от» отличается от «до», а рыночная цена — от цены выкупа.</li>
-<li><strong>Факты отдельно от рекламы.</strong> Заявления компаний («5000 сделок», «до 90% рынка») мы так и подписываем — как заявления.</li>
-<li><strong>Минусы наравне с плюсами.</strong> О слабых сторонах пишем так же подробно, как о сильных.</li>
-<li><strong>Повторы не скрываем.</strong> Если несколько сайтов, вероятно, принадлежат одному оператору, лучше знать об этом заранее.</li>
-<li><strong>Независимость.</strong> Рейтинг опирается на открытые данные, а компании для сравнения выбирает редакция.</li>
-</ul>
 <h2 class="sub">Для кого рейтинг</h2>
 <p>Для коллекционеров, которым важно понимать ценность своих бутылок. Для тех, кому достались чужой погреб или собрание и непонятно, с чего начать. Для владельцев ресторанов, баров и магазинов с остатками. И для всех, кто не хочет отдавать редкую бутылку за бесценок.</p>
 <h2 class="sub">О сайте</h2>
@@ -2040,11 +2024,11 @@ def sitemap_page():
 
 
 def privacy_page():
-    op = f"{ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}"
+    op = f"{ph('name', 'ФИО оператора')}"
     body = f"""
 <p class="muted">Редакция от {POLICY_DATE}</p>
 <h2>1. Общие положения</h2>
-<p>Настоящая политика описывает, как сайт «{SITE}» ({SITE_URL}) обрабатывает персональные данные посетителей. Оператор персональных данных — {op}{opt('address', ', адрес для обращений: {}')}, e-mail для обращений: {ph('email', 'e-mail')}. Политика составлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
+<p>Настоящая политика описывает, как сайт «{SITE}» ({SITE_URL}) обрабатывает персональные данные посетителей. Оператор персональных данных — {op}, e-mail для обращений: {ph('email', 'e-mail')}. Политика составлена в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
 <p>Сайт — информационный справочник, в котором сравниваются компании, скупающие алкоголь. Сайт не оказывает и не продаёт услуги и не рассчитан на лиц младше 18 лет.</p>
 <h2>2. Какие данные мы обрабатываем</h2>
 <ul>
@@ -2076,7 +2060,7 @@ def privacy_page():
 <h2>9. Изменения политики</h2>
 <p>Действующая редакция всегда опубликована на этой странице. Если мы начнём применять новые инструменты, политику обновят до их запуска. Метрику можно отключить расширением браузера («Блокировщик Метрики» и подобные) или <a class="text-link" href="https://yandex.ru/support/metrica/general/opt-out.html" rel="noopener nofollow">по инструкции Яндекса</a>.</p>
 <h2>10. Контакты</h2>
-<p>{op}{opt('address', '<br>Адрес: {}')}<br>E-mail: {ph('email', 'e-mail')}</p>
+<p>{op}<br>E-mail: {ph('email', 'e-mail')}</p>
 """
     return simple_page(f"Политика конфиденциальности — {SITE}", "Как сайт обрабатывает персональные данные посетителей: какие данные, для чего, какие у пользователей права и как связаться с оператором.",
                        "politika-konfidencialnosti.html", "Политика конфиденциальности", "Как мы обращаемся с персональными данными посетителей сайта.", body)
@@ -2153,7 +2137,7 @@ def contacts_page():
     body = f"""
 <p>«{SITE}» — независимый справочник, а не скупка алкоголя. Здесь можно связаться с редакцией: задать вопрос о рейтинге, сообщить об ошибке или предложить компанию для сравнения.</p>
 <h2>Редакция</h2>
-<p>Оператор сайта: {ph('name', 'ФИО оператора')}{opt('inn', '<br>ИНН: {}')}{opt('address', '<br>Адрес для обращений: {}')}<br>E-mail: {ph('email', 'e-mail')}{opt('phone', '<br>Телефон: {}')}{opt('telegram', '<br>Telegram: {}')}</p>
+<p>Оператор сайта: {ph('name', 'ФИО оператора')}<br>E-mail: {ph('email', 'e-mail')}</p>
 <h2>Куда написать</h2>
 <ul>
 <li><strong>Вы представляете компанию из рейтинга</strong> и нашли ошибку или хотите направить претензию — <a class="text-link" href="dlya-kompanii.html">страница для компаний</a>.</li>
@@ -2162,7 +2146,7 @@ def contacts_page():
 </ul>
 <p class="note">Мы не покупаем алкоголь и не принимаем бутылки. Чтобы продать коньяк, виски или вино, свяжитесь напрямую с выбранной компанией — её контакты есть в карточке.</p>
 """
-    return simple_page(f"Контакты редакции — {SITE}", "Как связаться с редакцией рейтинга скупок алкоголя: e-mail, Telegram, реквизиты оператора и страница для компаний.",
+    return simple_page(f"Контакты редакции — {SITE}", "Как связаться с редакцией рейтинга скупок алкоголя: e-mail, оператор сайта и страница для компаний.",
                        "kontakty.html", "Контакты", "Как связаться с редакцией.", body, eyebrow="Связь")
 
 
@@ -2331,7 +2315,7 @@ def terms_page():
 <h2>6. Изменения и применимое право</h2>
 <p>Мы вправе менять правила; действующая редакция всегда размещена на этой странице. К отношениям применяется право Российской Федерации.</p>
 <h2>7. Контакты</h2>
-<p>{ph('name', 'ФИО оператора')}{opt('inn', ', ИНН {}')}, e-mail: {ph('email', 'e-mail')}. Страница <a class="text-link" href="kontakty.html">«Контакты»</a>.</p>
+<p>{ph('name', 'ФИО оператора')}, e-mail: {ph('email', 'e-mail')}. Страница <a class="text-link" href="kontakty.html">«Контакты»</a>.</p>
 """
     return simple_page(f"Правила пользования сайтом — {SITE}", "Правила использования сайта: возрастное ограничение, цитирование материалов, правила отзывов и обращений.",
                        "pravila-polzovaniya.html", "Правила пользования сайтом", "Как пользоваться сайтом и что запрещено.", body)
