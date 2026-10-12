@@ -736,7 +736,7 @@ def shared_blocks(depth=0):
 <h2 class="calculator-title">Сколько стоит ваша бутылка при выкупе?</h2>
 <p class="calculator-copy">Хотите быстро и бесплатно понять, сколько можно получить за коньяк, виски, вино, шампанское, ром или арманьяк? Укажите рыночную цену бутылки (аукционную или импортёрскую), и калькулятор покажет примерный размер выкупа. По опубликованным таблицам скупки платят порядка 67–72% от неё. Это быстрый ориентир, а не оценка вашей бутылки: точную цифру называет эксперт по фотографиям и после осмотра, а на неё влияют производитель, выдержка, год, состояние и упаковка.</p>
 <form id="calcForm" class="form-grid">
-<label class="full lbl">Рыночная цена бутылки, ₽<input class="field" id="market" type="number" min="1" step="100" inputmode="numeric" placeholder="например, 45000" required></label>
+<label class="full lbl">Рыночная цена бутылки, ₽<input class="field" id="market" type="number" min="1" step="1" inputmode="numeric" placeholder="например, 45000" required></label>
 <button class="btn btn-primary calculator-submit full" type="submit">Оценить стоимость <span class="arrow">→</span></button>
 </form>
 </div>
