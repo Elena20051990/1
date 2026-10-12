@@ -654,3 +654,13 @@ dialog.review{border-radius:var(--r-lg)}
 .footer .logo-mark{background:#fff;border-radius:12px;padding:4px 6px;height:56px;width:auto}
 .logo-mark{height:48px;width:auto}
 .btn-primary{background:linear-gradient(135deg,#8e1230,#b0243f)}
+.chip{border-radius:999px;border:1px solid var(--rule);background:#fff;color:var(--ink);letter-spacing:0;text-transform:none;font-size:13px}
+.chip:hover{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.active,.chip.active:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.quote-block{background:linear-gradient(135deg,#2a0a14,#8e1230);border:0;color:#fff}
+.quote-block figure::before{color:#f6c9d1;font-style:normal}
+.quote-block blockquote p{color:#fff;font-style:normal;font-weight:700}
+.quote-block .qb-orig{color:#f0d3d9;font-style:italic}
+.quote-block figcaption{border-top:1px solid rgba(255,255,255,.35)}
+.quote-block figcaption b{color:#fff}
+.quote-block figcaption span{color:#f0d3d9}
