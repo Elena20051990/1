@@ -679,3 +679,18 @@ dialog.review{border-radius:var(--r-lg)}
 .legal strong{border-color:var(--accent);color:var(--accent)}
 .legal a{color:var(--accent)}
 .footer-logo-copy{color:#4a4144}
+/* бордовый подвал, логотип белый */
+.footer{background:#6e0f27;color:#f1dde2;border-top:0}
+.footer .nav-logo,.footer-title,.footer .footer-links a.footer-mail,.footer-tags-title,.footer .logo-word{color:#fff}
+.footer .logo-word b{color:#f6b8c4}
+.footer .nav-logo-sub{color:#e8c3cb}
+.footer .logo-mark{height:52px;width:auto;background:none;padding:0}
+.footer-logo-copy{color:#f1dde2}
+.footer-links a{color:#f1dde2}.footer-links a:hover{color:#fff;text-decoration:underline}
+.footer .footer-links a.footer-mail{text-decoration-color:#f6b8c4}
+.footer-tags,.legal{border-top-color:rgba(255,255,255,.2)}
+.footer-tags a{background:transparent;border-color:rgba(255,255,255,.35);color:#f8e8ec}
+.footer-tags a:hover{background:#fff;border-color:#fff;color:#6e0f27}
+.legal,.footer-bottom{color:#dfc0c8}
+.legal strong{border-color:#f6b8c4;color:#f6b8c4}
+.legal a{color:#fff}

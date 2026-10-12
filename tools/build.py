@@ -593,7 +593,7 @@ def footer_inline(depth=0, base=None):
 <div class="container">
 <div class="footer-main">
 <div>
-<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img class="logo-mark" src="{p}assets/logo-mark.png" alt="" width="40" height="44"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
+<a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img class="logo-mark" src="{p}assets/logo-mark-white.png" alt="" width="40" height="44"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
 <p class="footer-logo-copy">Независимый рейтинг скупок алкоголя в Москве и Московской области: выкуп коньяка, виски, вина и шампанского, условия и сроки оценки. Сайт ничего не покупает — заявку вы отправляете выбранной компании.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
