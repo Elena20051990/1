@@ -594,21 +594,21 @@ def footer_inline(depth=0, base=None):
 <div class="footer-main">
 <div>
 <a href="{home}" class="nav-logo footer-brand" aria-label="{SITE} — главная"><img class="logo-mark" src="{p}assets/logo-mark.png" alt="" width="40" height="44"><span class="logo-text"><span class="logo-word">{LOGO}</span><span class="nav-logo-sub">Рейтинг скупок алкоголя</span></span></a>
-<p class="footer-logo-copy">Независимый рейтинг скупок алкоголя. Здесь собраны компании, которые в Москве, Московской области и других городах России выкупают коньяк, виски, вино, шампанское, ром, арманьяк и алкоголь СССР: условия сделки, сроки оценки, выезд, цены. Сами мы ничего не покупаем: фото бутылки и заявку вы отправляете выбранной компании удобным способом — через форму на её сайте, в Telegram или WhatsApp.</p>
+<p class="footer-logo-copy">Независимый рейтинг скупок алкоголя в Москве и Московской области: выкуп коньяка, виски, вина и шампанского, условия и сроки оценки. Сайт ничего не покупает — заявку вы отправляете выбранной компании.</p>
 </div>
 <div><h3 class="footer-title">Разделы</h3><div class="footer-links">
-<a href="{home}">Главная</a><a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Водка</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#prepare">Как продать</a><a href="{home}#faq">Вопросы и ответы</a></div></div>
+<a href="{home}">Главная</a><a href="{home}#ranking">Рейтинг скупок</a><a href="{p}{TOPICS[0]["file"]}">Элитный алкоголь</a><a href="{p}{TOPICS[1]["file"]}">Текила</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Калькулятор</a><a href="{home}#prepare">Как продать</a><a href="{home}#faq">Вопросы и ответы</a></div></div>
 <div><h3 class="footer-title">Информация</h3><div class="footer-links">
 <a href="{p}metodika.html">Методика</a><a href="{p}o-reitinge.html">О рейтинге</a><a href="{p}dlya-kompanii.html">Для компаний</a><a href="{p}kontakty.html">Контакты</a><a href="{p}karta-sayta.html">Карта сайта</a></div></div>
 <div><h3 class="footer-title">Документы</h3><div class="footer-links">
 <a href="{p}redakcionnaya-politika.html">Редакционная политика</a><a href="{p}otkaz-ot-otvetstvennosti.html">Отказ от ответственности</a><a href="{p}pravila-polzovaniya.html">Правила пользования</a><a href="{p}politika-konfidencialnosti.html">Политика конфиденциальности</a><a href="{p}politika-cookie.html">Политика cookie</a></div>{footer_contacts()}</div>
 </div>
 <nav class="footer-tags" aria-label="Разделы сайта"><span class="footer-tags-title">Что выкупают и как продать</span>
-<a href="{home}#ranking">Скупка алкоголя в Москве</a><a href="{p}{TOPICS[0]["file"]}#guide">Продать коньяк и виски</a><a href="{p}{TOPICS[0]["file"]}#faq">Продать вино и шампанское</a><a href="{p}{TOPICS[0]["file"]}#guide">Ром и арманьяк</a><a href="{p}{TOPICS[1]["file"]}">Продать текилу</a><a href="{p}{TOPICS[1]["file"]}#guide">Мескаль и агава</a><a href="{p}{TOPICS[0]["file"]}#guide">Алкоголь СССР</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Оценка стоимости онлайн</a><a href="{home}#prepare">Как подготовить бутылку к продаже</a><a href="{home}#kinds">Коллекционные и редкие бутылки</a><a href="{home}#compare">Выезд оценщика и сроки</a><a href="{home}#faq">Вопросы и ответы</a>
+<a href="{home}#ranking">Скупка алкоголя в Москве</a><a href="{p}{TOPICS[0]["file"]}#guide">Продать коньяк и виски</a><a href="{p}{TOPICS[0]["file"]}#faq">Продать вино и шампанское</a><a href="{p}{TOPICS[1]["file"]}">Продать текилу</a><a href="{home}#kinds">Коллекционные бутылки</a><a href="{p}prices.html">Цены выкупа</a><a href="{home}#calc">Оценка онлайн</a><a href="{home}#compare">Выезд и сроки</a>
 </nav>
 <div class="legal">
 <p><strong>18+</strong> На сайте размещена информация об алкогольной продукции, он рассчитан на лиц старше 18 лет. Чрезмерное потребление алкоголя вредит здоровью. Продавать алкоголь лицам младше 18 лет запрещено.</p>
-<p>Сайт не оказывает услуг, не продаёт алкоголь и не принимает его у пользователей. Сведения справочные, со временем устаревают и не являются публичной офертой. Цены и сроки — заявления самих компаний; условия сделки, наличие выезда и точную стоимость уточняйте у них напрямую: позвоните или свяжитесь в мессенджере. Рейтинг составлен по открытым данным из разных источников; как именно, описано в <a href="{p}metodika.html">методике</a> и <a href="{p}redakcionnaya-politika.html">редакционной политике</a>.</p>
+<p>Сайт не оказывает услуг и не продаёт алкоголь. Сведения справочные и не являются офертой: цены, сроки и условия сделки уточняйте у самих компаний. Как составлен рейтинг — в <a href="{p}metodika.html">методике</a> и <a href="{p}redakcionnaya-politika.html">редакционной политике</a>.</p>
 <p>{op}.</p>
 </div>
 <div class="footer-bottom"><p>© 2026 {SITE}. Рейтинг скупок алкоголя: информация справочная.</p><p>Данные актуальны на {UPDATED}</p></div>
